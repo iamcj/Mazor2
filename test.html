@@ -1,0 +1,122 @@
+<html>
+  <head>
+<style>
+	#pointer {
+	position:absolute;
+	border-radius: 50%;
+	width: 10px;
+	height: 10px; 
+	background: blue;
+	z-index: 4;
+}
+	#hole{
+	position:absolute;
+	width: 10px;
+	height: 8px; 
+	background: white;
+	z-index: 3;
+}
+	#innercircle {
+	position:absolute;
+	border-radius: 50%;
+	width: 18px;
+	height: 18px; 
+	
+	border:1px solid grey;
+	z-index: 2;
+}
+
+	#outerCircle{
+	position:absolute;
+	border-radius: 50%;
+	width: 32px;
+	height: 32px; 
+	border:1px solid grey; 
+	z-index: 1;
+}
+
+	#box{
+	position:absolute;
+	width: 100px;
+	height: 100px; 
+	left: 600px;
+	top: 300px;
+	border:1px solid blue; 
+	z-index: 1;
+}
+
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var $mouseX = 0, $mouseY = 0;
+var $xp = 0, $yp =0;
+var timer;
+var helper =1;
+
+$(document).mousemove(function(e){
+	clearTimeout(timer);
+    $mouseX = e.pageX;
+    $mouseY = e.pageY;    
+	$("#pointer").css({left:$mouseX-5 +'px', top:$mouseY-5 +'px'});  
+	
+
+	
+	if(helper ==1){
+		
+		if($mouseX < $("#outerCircle").position().left+15||$mouseX > $("#outerCircle").position().left+20||$mouseY <$("#outerCircle").position().top||$mouseY > $("#outerCircle").position().top+20){
+			$("#innerCircle").css({left:$mouseX-10 +'px', top:$mouseY-10 +'px'}); 
+			$("#outerCircle").css({left:$mouseX-17 +'px', top:$mouseY-17 +'px'}); 
+			$("#hole").css({left:$mouseX-5 +'px', top:$mouseY-10 +'px'}); 
+			helper=0;
+			
+		} else {
+		// inside 
+		// if in outer circle, then you can move around, innercircel must rotate
+			if($mouseY > $("#outerCircle").position().top-15){
+				helper = 3;
+
+			}
+			if ($mouseX < $("#outerCircle").position().left+10){
+			var left = $('#box').offset().left;
+			$("#box").css({left:left})  // Set the left to its calculated position
+             .animate({"left":"0px"}, "slow");
+			 }
+	
+		}
+	} else if(helper==3){
+		if($mouseX < $("#outerCircle").position().left||$mouseX > $("#outerCircle").position().left+32||$mouseY <$("#outerCircle").position().top||$mouseY > $("#outerCircle").position().top+32){
+			helper =0;
+
+		} else {
+		
+		}
+	}
+	else {
+		$("#innerCircle").css({left:$mouseX-10 +'px', top:$mouseY-10 +'px'}); 
+		$("#outerCircle").css({left:$mouseX-17 +'px', top:$mouseY-17 +'px'}); 
+		$("#hole").css({left:$mouseX-5 +'px', top:$mouseY-10 +'px'}); 
+		$("#hole").css({visibility:'hidden'});
+		helper =0;
+				timer = setTimeout(function() {
+				helper =1;
+				$("#hole").css({visibility:'visible'});
+			}, 800);
+
+	}
+
+ 
+});
+
+</script>
+  </head>
+  <body bgcolor=white>
+
+	<div id="pointer"></div>
+	<div id="innerCircle"></div>
+	<div id="outerCircle"></div>
+	<div id="hole"></div>
+
+
+  </body>
+</html>
+
