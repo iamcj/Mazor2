@@ -4,9 +4,10 @@
 	#pointer {
 	position:absolute;
 	border-radius: 50%;
-	width: 10px;
-	height: 10px; 
-	background: blue;
+	width: 8px;
+	height: 8px; 
+	background: white;
+	border: solid 1px grey;
 	z-index: 4;
 }
 	#hole{
@@ -96,9 +97,11 @@ $(document).mousemove(function(e){
 		$("#outerCircle").css({left:$mouseX-17 +'px', top:$mouseY-17 +'px'}); 
 		$("#hole").css({left:$mouseX-5 +'px', top:$mouseY-10 +'px'}); 
 		$("#hole").css({visibility:'hidden'});
+		$("#pointer").css({background: 'white'});
 		helper =0;
 				timer = setTimeout(function() {
 				helper =1;
+				$("#pointer").css({background: 'blue'});
 				$("#hole").css({visibility:'visible'});
 			}, 800);
 
