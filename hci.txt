@@ -1,0 +1,88 @@
+affordance bron, 
+affordance (Norman, 1988; Gibson, 1979)
+
+Lucture 9
+13: rgb is meer wetenschappelijk.
+CMYK, is niet belangrijk omdatg we niets met printen doen., CMY come from mixing primaire color.
+67: LUT is look up table
+visual coding: is niet programmeren met kleurblokken, maar informatie duiden met kleur
+69: koffie, is koffbar op een kaart
+74: cijfers van regio's zijn glyphs
+
+
+https://snap.stanford.edu/data/#wikipedia
+http://drichard.org/mindmaps/#
+http://bl.ocks.org/robschmuecker/7880033
+http://www.redotheweb.com/CodeFlower/
+http://charts.animateddata.co.uk/datavistree/
+https://bl.ocks.org/kanesee/5d6c48bffd4ea31201fb
+https://marmelab.com/ArchitectureTree/
+https://github.com/ondras/my-mind
+http://my-mind.github.io/?url=examples%2Ffeatures.mymind
+https://app.wisemapping.com/c/maps/3/try
+
+Lecture 10
+sheet 34 niet zo belangrijk.
+9, textual dialogue notations wroden niet zo veerl gebruikt, minder goed leesbaar.
+
+71, topologie is relatie tussen
+74. ordinal = wel groter kleiner, maar niet exact bekentd.
+cycling data is mosstly timerelated.
+78: task abstraction = bottom up.
+
+Lecture 11:
+Waar is de muis he tmeest op het scherm. locatie voor opening.
+objective and subjective evenly important
+
+
+Project plan
+ ce783e56-09b6-4fd1-b056-fb92d0037eef
+ 
+Lecture 12:
+
+zoom previous = user control and freedom.
+sheet 19 en 20 nalopen voor usability specification.
+sheet 23 ook meenemen.
+formal and summative evaluation.
+
+groupware -> incremental prototyping
+
+<svg width="200" height="200">
+  <defs>
+    <mask id="hole">
+      <rect width="100%" height="100%" fill="white"/>
+      <circle r="30" cx="100" cy="180"   fill="black"/>
+    </mask>
+  </defs>
+
+  <circle id="donut" r="90" cx="100" cy="100" stroke="black" stroke-width="3" fill="transparent" mask="url(#hole)" />
+    
+</svg>
+
+Lecture 13:
+pervasive computing - buildings
+
+36,37:
+vragen beantwoorden?
+
+Doorlezen oude samenvattingen, domeinmodel etc.
+
+61 persusion vs pervasive
+
+informationvis
+
+
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+

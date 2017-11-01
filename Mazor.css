@@ -1,0 +1,19 @@
+html, body{
+    height: 100%;
+    width: 100%;
+	overflow-x: hidden;
+	overflow-y: hidden;
+}
+
+#Wrapper{
+	margin-bottom: 41px;
+	margin-right: 19px;
+}
+
+#Canvas {
+	z-index: 1;
+	height: 100%;
+    width: 100%;
+	border: 1px solid  #4F81BD;
+  }
+  
