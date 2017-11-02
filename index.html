@@ -17,13 +17,37 @@
   </head>
   <body bgcolor=white>
 
+	<div id="MazorDeActivated">
+		<svg class="MazorCircle">
+		<circle cx="35" cy="35" r="7" />
+		<circle cx="35" cy="35" r="21" />
+		<circle cx="35" cy="35" r="35" />
+		</svg>
+	</div>
+  
 	<div id="CursorBall"></div>
-	<div id="InnerCircle"></div>
+	<svg id="CursorBall" height="82" width="82">
+		<circle cx="41" cy="41" r="40" stroke="black" stroke-width="2" fill="transparent" />
+	</svg>
+	<div id="InnerCircle" >
+		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+    <path d="M0,21 A30,30 0 1,1 0,41" stroke-width="1" style="stroke:grey; fill:none;"/>
+		</svg>
+	</div>
+		<div id="InnerCircle2" >
+		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+    <path d="M0,21 A30,30 0 1,1 0,41" stroke-width="1" style="stroke:grey; fill:none;"/>
+		</svg>
+	</div>
 	<div id="OuterCircle"></div>
 	<div id="Wrapper">
 		<div id="Canvas"></div>
 	</div>
 
+
+	
   </body>
 </html>
 
