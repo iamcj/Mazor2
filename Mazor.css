@@ -19,19 +19,20 @@ html, body{
 	top: 200px;
 	border: 1px solid  #4F81BD;
   }
-  
-  #CursorBall  {
-	  z-index: 2;
-	  top: 50px;
-	  left: 50px;
+ 
+ 
+ /* Deactivated */
+ #MazorDeActivated  {
+	  z-index: 3;
+	  top: 150px;
+	  left: 150px;
+	  width: 72px;
+	  height: 72px;
 	  position:absolute;
 	  visibility:hidden;
-	  -ms-transform: rotate(90deg); /* IE 9 */
-    -webkit-transform: rotate(90deg); /* Chrome, Safari, Opera */
-    transform: rotate(90deg);
   }
-  
-  svg.MazorCircle {
+ 
+ svg.MazorCircle {
 	stroke: grey;
 	stroke-width:1px;
 	fill:transparent;
@@ -40,15 +41,22 @@ html, body{
 	width: 72px;
 	height: 72px;
   }
-   
-  #MazorDeActivated  {
-	  z-index: 3;
-	  top: 150px;
-	  left: 150px;
-	  width: 72px;
-	  height: 72px;
+  
+/* Activated */
+ #CursorBall  {
+	  z-index: 2;
 	  position:absolute;
-	  visibility:visible;
+	  visibility:hidden;
+  }
+ 
+  svg.CursorBall {
+	stroke: grey;
+	stroke-width:1px;
+	fill:blue;
+	padding-left:1px;
+	padding-top:1px;
+	width: 16px;
+	height: 16px;
   }
   
     #MouseMazorOuter1  {

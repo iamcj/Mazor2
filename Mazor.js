@@ -1,6 +1,12 @@
 // Date: 2017
 // Auteur:Corjan van Uffelen
 var mazorManager;
+var timer;
+var states = {DEACTIVATED:1, ACTIVATED:2, ACTIVATEDCLOSABLE:3, ZOOMACTIVATED:4,PANACTIVATED:5,FULLPANMODEACTIVATED:6};
+
+//settings
+var timeOutms = 500;
+var cursorBallRadius = 3.5; 
 
 // Start Mazor
 function init(){
@@ -26,7 +32,8 @@ function Mouse(){
 
 	// For the rest of the moving
 	function onMouseUpdate(e) {
-		mazorManager.updatePosition(e.pageX,e.pageY);
+		position = new Point(e.pageX,e.pageY);
+		mazorManager.updatePosition(position);
 	}
 
 //View Class
@@ -84,105 +91,150 @@ function MazorManager(){
 	this.mazor = new Mazor();
 	this.mouse = new Mouse();
 	this.mouse.init();
-	this.origin = new Point();
-	this.previousPosition = new Point();
-	this.activated = false;
 }
 
-	MazorManager.prototype.init = function(px,py){
-		this.origin.x = px;
-		this.origin.y = py;
+	MazorManager.prototype.init = function(position){
 		this.mazor.init();
-		this.mazor.updatePosition(px,py);
+		this.mazor.updatePosition(position);
 	}
 
-	MazorManager.prototype.updatePosition = function(px,py){
-		this.origin.x = px;
-		this.origin.y = py;
-		this.comparePosition();
-		this.mazor.updatePosition(px,py);
+	//StateManagement
+	MazorManager.prototype.updatePosition = function(position){
+		
+		if(this.mazor.isDeActivated()){
+			this.checkToActivate(position);
+		} else if (this.mazor.isActivated()){
+			this.checkToClosable(position);
+		} else if (this.mazor.isActivatedClosable()){
+			this.checkToClose(position);
+		} else if (this.mazor.isZoomActivated()){
+			
+		} else if (this.mazor.isPanActivated()){
+			
+		} else if (this.mazor.isFullPanModeActivated()){
+			
+		}
+		this.mazor.updatePosition(position);
 	}
 
-	MazorManager.prototype.comparePosition = function(){
-		if (this.origin.compare(this.previousPosition)){
-			this.activateMazor();
-		} else {
-			this.previousPosition = this.origin;
+	MazorManager.prototype.checkToActivate = function(position){
+		clearTimeout(timer);
+		var t = this;
+		timer = window.setTimeout(function(){t.mazor.activateMazor();},timeOutms);
+	}
+
+	MazorManager.prototype.checkToClosable = function(position){
+		//The mouse has to have left the center.
+		if(this.mazor.origin.calcDistance(position)> cursorBallRadius){
+			this.mazor.activateMazorClosable();
 		}
 	}
-
-	MazorManager.prototype.activateMazor = function(){
-		this.activated = true;
-		this.mazor.activated = true;
-		this.mazor.setOrigin(this.origin.x, this.origin.y);
+	
+	MazorManager.prototype.checkToClose = function(position){
+		//Check if the cursor is near the center;
+		if(this.mazor.origin.calcDistance(position)< cursorBallRadius-1){
+			this.mazor.deActivateMazor();
+		}
 	}
-
-	MazorManager.prototype.deActivateMazor = function(){
-		this.activated = false;
-		this.mazor.deActivateMazor();
-	}
+	
+	
 
 //Start of Mazor
 function Mazor(){
-	this.activated=false;
-	this.origin = new Point();
+	this.state;
+	this.origin;
 	this.cursorBall = new CursorBall();
 	this.MazorDeActivated = new MazorDeActivated();
 }
 
 	//Only move the circels if not activated.
-	Mazor.prototype.updatePosition = function(px,py){
-		if (this.activated==false){
-			this.origin.x = px;
-			this.origin.y = py;
-			this.MazorDeActivated.updatePosition(px,py);
-		}
+	Mazor.prototype.updatePosition = function(position){
+		if (this.isDeActivated()){
+			this.origin = position;
+			this.MazorDeActivated.updatePosition(position);
+		} else {
 		//update ball
-		this.cursorBall.updatePosition();
-		
+			this.cursorBall.updatePosition(position);
+		}
 	}
 
-	Mazor.prototype.setOrigin = function(px,py){
-		this.origin.x = px;
-		this.origin.y = py;
-	}
-	
 	Mazor.prototype.init = function(){
+		this.state = states.DEACTIVATED;
 		this.MazorDeActivated.show();
 	}
+	
+	Mazor.prototype.activateMazor = function(){
+		this.state = states.ACTIVATED;
+		this.MazorDeActivated.hide();
+		this.cursorBall.show();
+		this.cursorBall.setPosition(this.origin);
+	}
+	
+	Mazor.prototype.activateMazorClosable = function(){
+		this.state = states.ACTIVATEDCLOSABLE;
+	}
+	
+	
+	Mazor.prototype.deActivateMazor = function(){
+		this.state = states.DEACTIVATED;
+		this.cursorBall.hide();
+	}
+	
+	Mazor.prototype.isActivated = function(){
+		return (this.state == states.ACTIVATED);
+	}
+	
+	Mazor.prototype.isActivatedClosable = function(){
+		return (this.state == states.ACTIVATEDCLOSABLE);
+	}
+
+	Mazor.prototype.isDeActivated = function(){
+		return (this.state == states.DEACTIVATED);
+	}	
+	
+	Mazor.prototype.isZoomActivated = function(){
+		return (this.state == states.ZOOMACTIVATED);
+	}	
+
+	Mazor.prototype.isPanActivated = function(){
+		return (this.state == states.PANACTIVATED);
+	}	
+
+	Mazor.prototype.isFullPanModeActivated = function(){
+		return (this.state == states.FULLPANMODEACTIVATED);
+	}	
+
 
 function Element(){
 	this.div;
 	this.activated = false;
 	this.visible = false;
-	this.origin = new Point();
+	this.origin;
 }
 
-	Element.prototype.updatePosition = function(px,py){
+	Element.prototype.updatePosition = function(position){
 		if (this.visible) {
-			this.origin.x = px;
-			this.origin.y = py;
-			this.setPosition(px,py);
+			this.origin = position;
+			this.setPosition(position);
 		}
 					
 	}
 
 	// take half of the size into account to position the element
-	Element.prototype.setPosition = function(x,y){
-		var left = x - (this.div.offsetWidth /2);
-		var top = y - (this.div.offsetHeight /2);
+	Element.prototype.setPosition = function(position){
+		var left = position.x - (this.div.offsetWidth /2);
+		var top = position.y - (this.div.offsetHeight /2);
 		this.div.style.left = left+'px';
 		this.div.style.top = top+'px';
 	}
 	
-	Element.prototype.setOrigin = function(px,py){
-		this.origin.x = px;
-		this.origin.y = py;
+	Element.prototype.setOrigin = function(position){
+		this.origin = position;
 	}
 
 	Element.prototype.activate = function(){
 		this.activated = true;
-		this.show;
+		this.show();
 	}
 	
 	Element.prototype.setDiv = function(divName){
@@ -241,9 +293,9 @@ function Zoom(){
 }
 
 //Helper classes and functions
-function Point(){
-	this.x = 0;
-	this.y = 0;
+function Point(px,py){
+	this.x = px;
+	this.y = py;
 }
 
 	//Calculate distance between the point and another points
