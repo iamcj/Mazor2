@@ -17,7 +17,7 @@
   </head>
   <body bgcolor=white>
 
-	<div id="MazorDeActivated">
+	<div id="MazorDeActivated" class="default">
 		<svg class="MazorCircle">
 		<circle cx="35" cy="35" r="7" />
 		<circle cx="35" cy="35" r="21" />
@@ -25,24 +25,42 @@
 		</svg>
 	</div>
   
-	<div id="CursorBall">
+	<div id="CursorBall" class="default">
 		<svg class = "CursorBall">
 			<circle cx="8" cy="8" r="7" />
 		</svg>
 	</div>
-	<div id="InnerCircle" >
+	<div id="InnerCircle" class="default">
 		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-
-    <path d="M0,21 A30,30 0 1,1 0,41" stroke-width="1" style="stroke:grey; fill:none;"/>
+			<path d="M0,26 A35,35 0 1,1 0,46" stroke-width="1.5" style="stroke:rgb(47, 85, 151); fill:none;"/>
+			
 		</svg>
 	</div>
-		<div id="InnerCircle2" >
-		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-
-    <path d="M0,21 A30,30 0 1,1 0,41" stroke-width="1" style="stroke:grey; fill:none;"/>
+	<div id="OuterCircle" class="default">
+			<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+			<path d="M15,26 A21,21 0 1,1 15,46" stroke-width="1.5" style="stroke:rgb(47, 85, 151); fill:none;"/>
 		</svg>
 	</div>
-	<div id="OuterCircle"></div>
+	
+	<div id="Close" class="default"></div>
+	
+	<div id="MagnifyingGlass" class="default">
+		<svg class = "MagnifyingGlass">
+			<circle cx="8" cy="8" r="7" />
+		</svg>
+	</div>
+	
+	<div id="PanIcon" class="default">
+		<svg class = "PanIcon">
+			<circle cx="9" cy="9" r="9" />
+		</svg>
+		<div id="PanIconImage" class="default">
+			<img src="panIcon.png"></img>
+		</div>
+	
+	</div>
+
+
 	<div id="Wrapper">
 		<div id="Canvas"></div>
 	</div>

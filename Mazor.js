@@ -5,8 +5,11 @@ var timer;
 var states = {DEACTIVATED:1, ACTIVATED:2, ACTIVATEDCLOSABLE:3, ZOOMACTIVATED:4,PANACTIVATED:5,FULLPANMODEACTIVATED:6};
 
 //settings
-var timeOutms = 500;
+var timeOutms = 400;
 var cursorBallRadius = 3.5; 
+var closeRadius = 55;
+var panIconOffset = 47;
+var zoomIconOffset = 27;
 
 // Start Mazor
 function init(){
@@ -132,7 +135,9 @@ function MazorManager(){
 	
 	MazorManager.prototype.checkToClose = function(position){
 		//Check if the cursor is near the center;
-		if(this.mazor.origin.calcDistance(position)< cursorBallRadius-1){
+		if(this.mazor.origin.calcDistance(position)< cursorBallRadius){
+			this.mazor.deActivateMazor();
+		} else if(this.mazor.origin.calcDistance(position)> closeRadius){
 			this.mazor.deActivateMazor();
 		}
 	}
@@ -145,6 +150,12 @@ function Mazor(){
 	this.origin;
 	this.cursorBall = new CursorBall();
 	this.MazorDeActivated = new MazorDeActivated();
+	this.innerCircle = new InnerCircle();
+	this.outerCircle = new OuterCircle();
+	this.close = new Close();
+	this.panIcon = new PanIcon();
+	this.panIconImage = new PanIconImage();
+	this.zoomIcon = new ZoomIcon();
 }
 
 	//Only move the circels if not activated.
@@ -155,6 +166,11 @@ function Mazor(){
 		} else {
 		//update ball
 			this.cursorBall.updatePosition(position);
+			this.innerCircle.rotate(this.origin.calcAngle(position)+180);
+			this.outerCircle.rotate(this.origin.calcAngle(position)+180);
+			this.panIcon.rotateIcon(this.origin.calcAngle(position));
+			this.zoomIcon.rotateIcon(this.origin.calcAngle(position));
+			
 		}
 	}
 
@@ -168,16 +184,40 @@ function Mazor(){
 		this.MazorDeActivated.hide();
 		this.cursorBall.show();
 		this.cursorBall.setPosition(this.origin);
+		this.innerCircle.show();
+		this.innerCircle.setPosition(this.origin);
+		this.outerCircle.show();
+		this.outerCircle.setPosition(this.origin);
+		this.close.show();
+		this.close.setPosition(this.origin);
+		this.zoomIcon.show();
+		this.zoomIcon.offset = zoomIconOffset;
+		this.zoomIcon.setPosition(this.origin);
+		this.zoomIcon.rotateIcon(-90);
+		this.panIcon.show();
+		this.panIcon.offset = panIconOffset;
+		this.panIcon.setPosition(this.origin);
+		this.panIcon.rotateIcon(-90);
+		this.panIconImage.show();
+		
+
+		
 	}
 	
 	Mazor.prototype.activateMazorClosable = function(){
 		this.state = states.ACTIVATEDCLOSABLE;
 	}
 	
-	
 	Mazor.prototype.deActivateMazor = function(){
 		this.state = states.DEACTIVATED;
+		this.MazorDeActivated.show();
 		this.cursorBall.hide();
+		this.innerCircle.hide();
+		this.outerCircle.hide();
+		this.close.hide();
+		this.panIcon.hide();
+		this.zoomIcon.hide();
+		this.panIconImage.hide();
 	}
 	
 	Mazor.prototype.isActivated = function(){
@@ -213,15 +253,13 @@ function Element(){
 }
 
 	Element.prototype.updatePosition = function(position){
-		if (this.visible) {
-			this.origin = position;
-			this.setPosition(position);
-		}
-					
+		this.origin = position;
+		this.setPosition(position);				
 	}
 
 	// take half of the size into account to position the element
 	Element.prototype.setPosition = function(position){
+		this.origin = position;
 		var left = position.x - (this.div.offsetWidth /2);
 		var top = position.y - (this.div.offsetHeight /2);
 		this.div.style.left = left+'px';
@@ -250,41 +288,68 @@ function Element(){
 		this.visible = false;
 		this.div.setAttribute("style","visibility:hidden");
 	}
+	
+	Element.prototype.rotate = function(deg){
+		this.div.style.webkitTransform = 'rotate('+deg+'deg)'; 
+		this.div.style.mozTransform    = 'rotate('+deg+'deg)'; 
+		this.div.style.msTransform     = 'rotate('+deg+'deg)'; 
+		this.div.style.transform       = 'rotate('+deg+'deg)'; 
+	}
 
+Element.prototype.rotateIcon = function(deg){
+		this.div.style.webkitTransform = 'rotate('+deg+'deg)'; 
+		this.div.style.mozTransform    = 'rotate('+deg+'deg)'; 
+		this.div.style.msTransform     = 'rotate('+deg+'deg)'; 
+		this.div.style.transform       = 'rotate('+deg+'deg)'; 
+		var left = this.origin.x - (this.div.offsetWidth /2);
+		var top = this.origin.y - (this.div.offsetHeight /2);
+		left = left + Math.cos(rad(deg)) * this.offset;
+		top = top + Math.sin(rad(deg)) * this.offset;
+		this.div.style.left = left+'px';
+		this.div.style.top = top+'px';
+	}
+
+	
+CursorBall.prototype = new Element();
 function CursorBall(){
 	this.setDiv('CursorBall');	
 }
 
-//CursorBall.prototype = Object.create(Element.prototype);
-//CursorBall.prototype.constructor = Element;
-CursorBall.prototype = new Element();
-
+InnerCircle.prototype = new Element();
 function InnerCircle(){
 	this.setDiv('InnerCircle');	
 }
 
-//InnerCircle.prototype = Object.create(Element.prototype);
-//InnerCircle.prototype.constructor = Element;
-InnerCircle.prototype = new Element();
-
 MazorDeActivated.prototype = new Element();
-
 function MazorDeActivated(){
 	this.setDiv('MazorDeActivated');	
 }
 
-//InnerCircle.prototype = Object.create(Element.prototype);
-//InnerCircle.prototype.constructor = Element;
-InnerCircle.prototype = new Element();
-
-
+OuterCircle.prototype = new Element();
 function OuterCircle(){
 	this.setDiv('OuterCircle');	
 }
 
-//OuterCircle.prototype = Object.create(Element.prototype);
-//OuterCircle.prototype.constructor = Element;
-OuterCircle.prototype = new Element();
+Close.prototype = new Element();
+function Close(){
+	this.setDiv('Close');	
+}
+
+PanIcon.prototype = new Element();
+function PanIcon(){
+	this.setDiv('PanIcon');
+}
+
+PanIconImage.prototype = new Element();
+function PanIconImage(){
+	this.setDiv('PanIconImage');
+}
+
+ZoomIcon.prototype = new Element();
+function ZoomIcon(){
+	this.setDiv('MagnifyingGlass');
+}
+
 
 function Zoom(){
 	this.min = 1;
@@ -304,6 +369,12 @@ function Point(px,py){
 		var y = Math.abs(this.y - toPoint.y);
 		var d = Math.sqrt( x*x + y*y);
 		return d;
+	}
+	
+	//Calculate distance between the point and another points
+	Point.prototype.calcAngle = function(toPoint){
+		var angleDeg = Math.atan2(toPoint.y - this.y, toPoint.x - this.x) * 180 / Math.PI;
+		return angleDeg;
 	}
 
 	//Compare to other point
