@@ -108,8 +108,10 @@ function MazorManager(){
 			this.checkToActivate(position);
 		} else if (this.mazor.isActivated()){
 			this.checkToClosable(position);
+			this.checkToHighlightZoom(position);
 		} else if (this.mazor.isActivatedClosable()){
 			this.checkToClose(position);
+			this.checkToHighlightZoom(position);
 		} else if (this.mazor.isZoomActivated()){
 			
 		} else if (this.mazor.isPanActivated()){
@@ -130,6 +132,14 @@ function MazorManager(){
 		//The mouse has to have left the center.
 		if(this.mazor.origin.calcDistance(position)> cursorBallRadius){
 			this.mazor.activateMazorClosable();
+		}
+	}
+	
+	MazorManager.prototype.checkToHighlightZoom = function(position){
+		if(this.mazor.zoomIcon.getRealPosition().calcDistance(position) < cursorBallRadius*3){
+			this.mazor.highlightZoom();
+		} else {
+			this.mazor.notHighlightZoom();
 		}
 	}
 	
@@ -217,6 +227,14 @@ function Mazor(){
 		this.panIconImage.hide();
 	}
 	
+	Mazor.prototype.highlightZoom = function(){
+			this.zoomIcon.highlightZoom();
+	}
+	
+	Mazor.prototype.notHighlightZoom = function(){
+			this.zoomIcon.notHighlightZoom();
+	}
+	
 	Mazor.prototype.isActivated = function(){
 		return (this.state == states.ACTIVATED);
 	}
@@ -247,24 +265,25 @@ function Element(){
 	this.activated = false;
 	this.visible = false;
 	this.origin;
+	this.realPosition = new Point();
 }
 
-	Element.prototype.updatePosition = function(position){
-		this.origin = position;
-		this.setPosition(position);				
+	Element.prototype.updatePosition = function(origin){
+		this.origin = origin;
+		this.setPosition(origin);				
 	}
 
 	// take half of the size into account to position the element
-	Element.prototype.setPosition = function(position){
-		this.origin = position;
-		var left = position.x - (this.div.offsetWidth /2);
-		var top = position.y - (this.div.offsetHeight /2);
+	Element.prototype.setPosition = function(origin){
+		this.origin = origin;
+		var left = origin.x - (this.div.offsetWidth /2);
+		var top = origin.y - (this.div.offsetHeight /2);
 		this.div.style.left = left+'px';
 		this.div.style.top = top+'px';
 	}
 	
-	Element.prototype.setOrigin = function(position){
-		this.origin = position;
+	Element.prototype.setOrigin = function(origin){
+		this.origin = origin;
 	}
 
 	Element.prototype.activate = function(){
@@ -286,7 +305,7 @@ function Element(){
 		this.div.setAttribute("style","visibility:hidden");
 	}
 	
-	Element.prototype.rotate = function(deg){
+Element.prototype.rotate = function(deg){
 		this.div.style.webkitTransform = 'rotate('+deg+'deg)'; 
 		this.div.style.mozTransform    = 'rotate('+deg+'deg)'; 
 		this.div.style.msTransform     = 'rotate('+deg+'deg)'; 
@@ -294,18 +313,19 @@ function Element(){
 	}
 
 Element.prototype.rotateIcon = function(deg){
-		this.div.style.webkitTransform = 'rotate('+deg+'deg)'; 
-		this.div.style.mozTransform    = 'rotate('+deg+'deg)'; 
-		this.div.style.msTransform     = 'rotate('+deg+'deg)'; 
-		this.div.style.transform       = 'rotate('+deg+'deg)'; 
-		var left = this.origin.x - (this.div.offsetWidth /2);
-		var top = this.origin.y - (this.div.offsetHeight /2);
-		left = left + Math.cos(rad(deg)) * this.offset;
-		top = top + Math.sin(rad(deg)) * this.offset;
+		this.rotate(deg);
+		this.realPosition.x = this.origin.x + Math.cos(rad(deg)) * this.offset;
+		this.realPosition.y = this.origin.y + Math.sin(rad(deg)) * this.offset;
+		var left = this.realPosition.x - (this.div.offsetWidth /2);
+		var top = this.realPosition.y - (this.div.offsetHeight /2);
 		this.div.style.left = left+'px';
 		this.div.style.top = top+'px';
 	}
 
+
+Element.prototype.getRealPosition = function(deg){
+		return this.realPosition;
+	}
 	
 CursorBall.prototype = new Element();
 function CursorBall(){
@@ -347,6 +367,13 @@ function ZoomIcon(){
 	this.setDiv('MagnifyingGlass');
 }
 
+ZoomIcon.prototype.highlightZoom = function(){
+	document.documentElement.style.setProperty('--ZoomColor', 'var(--purple-color)');
+}
+
+ZoomIcon.prototype.notHighlightZoom = function(){
+	document.documentElement.style.setProperty('--ZoomColor', 'var(--blue-color)');
+}
 
 function Zoom(){
 	this.min = 1;
