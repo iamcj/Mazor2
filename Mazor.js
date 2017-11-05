@@ -6,10 +6,10 @@ var states = {DEACTIVATED:1, ACTIVATED:2, ACTIVATEDCLOSABLE:3, ZOOMACTIVATED:4,P
 
 //settings
 var timeOutms = 400;
-var cursorBallRadius = 3.5; 
-var closeRadius = 55;
-var panIconOffset = 47;
-var zoomIconOffset = 27;
+var cursorBallRadius = 4.5; 
+var closeRadius = 70;
+var panIconOffset = 57;
+var zoomIconOffset = 36;
 
 // Start Mazor
 function init(){
@@ -164,7 +164,6 @@ function Mazor(){
 			this.origin = position;
 			this.MazorDeActivated.updatePosition(position);
 		} else {
-		//update ball
 			this.cursorBall.updatePosition(position);
 			this.innerCircle.rotate(this.origin.calcAngle(position)+180);
 			this.outerCircle.rotate(this.origin.calcAngle(position)+180);
@@ -199,9 +198,7 @@ function Mazor(){
 		this.panIcon.setPosition(this.origin);
 		this.panIcon.rotateIcon(-90);
 		this.panIconImage.show();
-		
-
-		
+			
 	}
 	
 	Mazor.prototype.activateMazorClosable = function(){
