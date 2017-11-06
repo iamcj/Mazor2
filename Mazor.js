@@ -109,9 +109,11 @@ function MazorManager(){
 		} else if (this.mazor.isActivated()){
 			this.checkToClosable(position);
 			this.checkToHighlightZoom(position);
+			this.checkToHighlightPan(position);
 		} else if (this.mazor.isActivatedClosable()){
 			this.checkToClose(position);
 			this.checkToHighlightZoom(position);
+			this.checkToHighlightPan(position);
 		} else if (this.mazor.isZoomActivated()){
 			
 		} else if (this.mazor.isPanActivated()){
@@ -140,6 +142,14 @@ function MazorManager(){
 			this.mazor.highlightZoom();
 		} else {
 			this.mazor.notHighlightZoom();
+		}
+	}
+	
+	MazorManager.prototype.checkToHighlightPan = function(position){
+		if(this.mazor.panIcon.getRealPosition().calcDistance(position) < cursorBallRadius*3){
+			this.mazor.highlightPan();
+		} else {
+			this.mazor.notHighlightPan();
 		}
 	}
 	
@@ -233,6 +243,14 @@ function Mazor(){
 	
 	Mazor.prototype.notHighlightZoom = function(){
 			this.zoomIcon.notHighlightZoom();
+	}
+
+	Mazor.prototype.highlightPan = function(){
+			this.panIcon.highlightPan();
+	}
+	
+	Mazor.prototype.notHighlightPan = function(){
+			this.panIcon.notHighlightPan();
 	}
 	
 	Mazor.prototype.isActivated = function(){
@@ -360,6 +378,16 @@ function PanIcon(){
 PanIconImage.prototype = new Element();
 function PanIconImage(){
 	this.setDiv('PanIconImage');
+}
+
+PanIcon.prototype.highlightPan = function(){
+	document.documentElement.style.setProperty('--PanColor', 'var(--green-color)');
+	document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515green.png");
+}
+
+PanIcon.prototype.notHighlightPan = function(){
+	document.documentElement.style.setProperty('--PanColor', 'var(--blue-color)');
+	document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515.png");
 }
 
 ZoomIcon.prototype = new Element();

@@ -10,6 +10,7 @@ html, body{
   --purple-color: rgb(156, 12, 115);
   --green-color: rgb(84, 130, 53);
   --ZoomColor: var(--blue-color);
+  --PanColor: var(--blue-color);
 }
 
 .default {
@@ -139,7 +140,7 @@ svg.MagnifyingGlass {
 }
 
 svg.PanIcon {
-	stroke: var(--blue-color);
+	stroke: var(--PanColor);
 	stroke-width:1.5px;
 	fill: white;
 	padding-left:1px;
