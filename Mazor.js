@@ -397,6 +397,7 @@ function ZoomIcon(){
 
 ZoomIcon.prototype.highlightZoom = function(){
 	document.documentElement.style.setProperty('--ZoomColor', 'var(--purple-color)');
+	document.documentElement.style.setProperty('--ZoomFillColor', 'var(--lightPurple-color)');
 }
 
 ZoomIcon.prototype.notHighlightZoom = function(){
