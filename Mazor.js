@@ -2,13 +2,14 @@
 // Auteur:Corjan van Uffelen
 var mazorManager;
 var timer;
+var closeTimer;
 var zoomTimer;
 var panTimer;
 var states = {DEACTIVATED:1, ACTIVATED:2, ACTIVATEDCLOSABLE:3, ZOOMACTIVATED:4,PANACTIVATED:5,FULLPANMODEACTIVATED:6};
 
 //settings
 var timeOutms = 400;
-var iconTimeOutms = 400;
+var iconTimeOutms = 200;
 var cursorBallRadius = 4.5; 
 var closeRadius = 70;
 var panIconOffset = 57;
@@ -133,6 +134,7 @@ function MazorManager(){
 		} else if (this.mazor.isActivatedClosable()){
 			clearTimeout(zoomTimer);	
 			clearTimeout(panTimer);	
+			clearTimeout(closeTimer);
 			this.checkActivatedClosable(position);
 		} else if (this.mazor.isZoomActivated()){
 			// if zoom is activated we first check if we are still in the zoomring.
@@ -141,8 +143,7 @@ function MazorManager(){
 			//zoom in?
 			//zoom out?
 			if (this.cursorInZoomRing(position)){
-				this.checkZoomIn(position);
-				this.checkZoomOut(position);
+				this.setZoomInOut(position);
 			} else {
 				// change the state to ACTIVATEDCLOSABLE en then do the checks that belong to that state.
 				this.mazor.deActivateZoom();
@@ -162,9 +163,23 @@ function MazorManager(){
 			}
 			
 		} else if (this.mazor.isFullPanModeActivated()){
-			//this.checkToClose(position);
-			//this.checkToHighlightZoom(position);
-			//this.checkToHighlightPan(position);	
+			clearTimeout(closeTimer);
+			clearTimeout(zoomTimer);
+			if (!this.cursorInPanArea(position)){
+				if (!this.checkToClose(position)) {
+					// if not close then chech to highlight zoom or pan.
+				// if highlight we can launch the timer to activate the zoom.
+						this.checkZoomActivated(position);
+					
+				}
+			//	this.mazor.deActivateFullPanMode();
+			//	this.mazor.activateMazorClosable();
+			//	this.checkActivatedClosable(position);
+			} else {
+				this.mazor.pan(position);
+			}	
+			
+			this.checkToHighlightZoom(position);
 		}
 		this.mazor.updatePosition(position);
 	}
@@ -232,17 +247,19 @@ function MazorManager(){
 		}
 	}
 	
-	MazorManager.prototype.checkZoomIn = function(position){
+	MazorManager.prototype.setZoomInOut = function(position){
 		//check position
-		//set icon
-		//change zoomlevel
-	}
-
-	MazorManager.prototype.checkZoomOut = function(position){
-		//check position
-		//set icon
-		//change zoomlevel
-
+		var angle = this.mazor.origin.calcAngle(position); 
+	
+		if (this.mazor.origin.calcAngle(position)> this.mazor.zoomDegrees){
+			//set icon
+			this.mazor.zoomIcon.showPlus();
+			//change zoomlevel
+		} else {
+			this.mazor.zoomIcon.showMin();
+			//change zoomlevel
+		}
+		this.mazor.zoomDegrees = angle
 	}
 	
 	MazorManager.prototype.checkToHighlightPan = function(position){
@@ -280,13 +297,24 @@ function MazorManager(){
 		}
 	}
 	
+	MazorManager.prototype.cursorInPanArea = function(position){
+		var dist = this.mazor.origin.calcDistance(position);
+		if( dist > (panIconOffset - cursorBallRadius*3)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	MazorManager.prototype.checkToClose = function(position){
 		//Check if the cursor is near the center;
 		if(this.mazor.origin.calcDistance(position)< cursorBallRadius){
-			this.mazor.deActivateMazor();
+			//wait to close
+			var t = this;
+			closeTimer = window.setTimeout(function(){t.mazor.deActivateMazor(position);},iconTimeOutms);
 			return true;
 		} else if(this.mazor.origin.calcDistance(position)> closeRadius){
-			this.mazor.deActivateMazor();
+			this.mazor.deActivateMazor(position);
 			return true;
 		} else {
 			return false;
@@ -305,8 +333,8 @@ function Mazor(){
 	this.outerCircle = new OuterCircle();
 	this.close = new Close();
 	this.panIcon = new PanIcon();
-	this.panIconImage = new PanIconImage();
 	this.zoomIcon = new ZoomIcon();
+	this.zoomDegrees;
 }
 
 	//Only move the circels if not activated.
@@ -331,7 +359,7 @@ function Mazor(){
 	Mazor.prototype.activateMazor = function(){
 		this.state = states.ACTIVATED;
 		this.MazorDeActivated.hide();
-		this.cursorBall.show();
+		this.cursorBall.showNormal();
 		this.cursorBall.setPosition(this.origin);
 		this.innerCircle.show();
 		this.innerCircle.setPosition(this.origin);
@@ -343,12 +371,10 @@ function Mazor(){
 		this.zoomIcon.offset = zoomIconOffset;
 		this.zoomIcon.setPosition(this.origin);
 		this.zoomIcon.rotateIcon(-90);
-		this.panIcon.show();
+		this.panIcon.showNormal();
 		this.panIcon.offset = panIconOffset;
 		this.panIcon.setPosition(this.origin);
-		this.panIcon.rotateIcon(-90);
-		this.panIconImage.show();
-			
+		this.panIcon.rotateIcon(-90);		
 	}
 	
 	Mazor.prototype.activateMazorClosable = function(){
@@ -358,6 +384,12 @@ function Mazor(){
 	Mazor.prototype.activateZoom = function(position){
 		this.state = states.ZOOMACTIVATED;	
 		this.zoomIcon.showTwoWay();
+		this.zoomDegrees = this.origin.calcAngle(position);
+		// extra stuff for if you come from panmode
+		this.panIcon.showNormal();
+		this.panIcon.rotateIcon(this.origin.calcAngle(position));
+		this.cursorBall.showNormal();
+		this.cursorBall.updatePosition(position);
 	}
 	
 	Mazor.prototype.deActivateZoom = function(){
@@ -368,7 +400,9 @@ function Mazor(){
 		this.state = states.PANACTIVATED;
 		//neede because you van go from zoomActivated to Panactivated without passing ACTIVATEDCLOSABLE
 		//this.deActivateZoom();
-		this.panIcon.showActivePanIcon();
+		//this.panIcon.showActivePanIcon();
+		this.panIcon.hideAll();
+		this.cursorBall.showFullPanMode();
 	}
 	
 	Mazor.prototype.deActivatePan = function(){
@@ -377,8 +411,6 @@ function Mazor(){
 	
 	Mazor.prototype.activateFullPanMode = function(position){
 		this.state = states.FULLPANMODEACTIVATED;	
-		this.panIcon.hide();
-		this.cursorBall.showFullPanMode();
 	}
 	
 	Mazor.prototype.deActivateFullPanMode = function(){
@@ -386,20 +418,21 @@ function Mazor(){
 		this.cursorBall.showNormal();
 	}
 	
-	Mazor.prototype.deActivateMazor = function(){
+	Mazor.prototype.deActivateMazor = function(position){
 		this.state = states.DEACTIVATED;
 		this.MazorDeActivated.show();
 		this.cursorBall.hide();
 		this.innerCircle.hide();
 		this.outerCircle.hide();
 		this.close.hide();
-		this.panIcon.hide();
+		this.panIcon.hideAll();
 		this.zoomIcon.hideAll();
-		this.panIconImage.hide();
+		this.updatePosition(this.origin);
 	}
 	
 	Mazor.prototype.highlightZoom = function(){
 			this.zoomIcon.highlightZoom();
+			this.notHighlightPan();
 	}
 	
 	Mazor.prototype.notHighlightZoom = function(){
@@ -407,12 +440,16 @@ function Mazor(){
 	}
 
 	Mazor.prototype.highlightPan = function(){
-		this.state = states.ACTIVATEDCLOSABLE
 		this.panIcon.highlightPan();
+		this.notHighlightZoom();
 	}
 	
 	Mazor.prototype.notHighlightPan = function(){
 			this.panIcon.notHighlightPan();
+	}
+	
+	Mazor.prototype.pan = function(position){
+	
 	}
 	
 	Mazor.prototype.isActivated = function(){
@@ -516,6 +553,7 @@ function CursorBall(){
 	}
 	
 	CursorBall.prototype.showNormal = function(){
+		this.show();
 		document.documentElement.style.setProperty('--cursorBorder-color', 'var(--grey-color)');
 		document.documentElement.style.setProperty('--cursorFill-color', 'var(--blue-color)');
 	}
@@ -543,11 +581,7 @@ function Close(){
 PanIcon.prototype = new Element();
 function PanIcon(){
 	this.setDiv('PanIcon');
-}
-
-PanIconImage.prototype = new Element();
-function PanIconImage(){
-	this.setDiv('PanIconImage');
+	this.panIconImage = new PanIconImage();
 }
 
 	PanIcon.prototype.highlightPan = function(){
@@ -566,8 +600,21 @@ function PanIconImage(){
 	}
 
 	PanIcon.prototype.showNormal = function(){
+		this.show();
+		this.panIconImage.show();
 		this.notHighlightPan();
 	}
+	
+	PanIcon.prototype.hideAll = function(){
+		this.hide();
+		this.panIconImage.hide();
+		
+	}
+	
+PanIconImage.prototype = new Element();
+function PanIconImage(){
+	this.setDiv('PanIconImage');
+}
 
 ZoomIcon.prototype = new Element();
 function ZoomIcon(){
@@ -593,7 +640,15 @@ ZoomIcon.prototype.hideAll = function(){
 
 ZoomIcon.prototype.showTwoWay = function(){
 	this.zoomHolder.showHolderStraight();
-	this.activatedZoomImage.show();
+	this.activatedZoomImage.showTwoWay();
+}
+
+ZoomIcon.prototype.showPlus = function(){
+	this.activatedZoomImage.showPlus();
+}
+
+ZoomIcon.prototype.showMin = function(){
+	this.activatedZoomImage.showMin();
 }
 
 ZoomIcon.prototype.highlightZoom = function(){
@@ -611,6 +666,19 @@ ZoomIcon.prototype.notHighlightZoom = function(){
 ActivatedZoomImage.prototype = new Element();
 function ActivatedZoomImage(){
 	this.setDiv('ActivatedZoomImage');
+}
+
+ActivatedZoomImage.prototype.showTwoWay = function(){
+	this.show();
+	document.getElementById('ActivatedZoomImage1515').setAttribute("src","TwoWayIcon.png");
+}
+
+ActivatedZoomImage.prototype.showPlus = function(){
+	document.getElementById('ActivatedZoomImage1515').setAttribute("src","PlusIcon.png");
+}
+
+ActivatedZoomImage.prototype.showMin = function(){
+	document.getElementById('ActivatedZoomImage1515').setAttribute("src","MinIcon.png");
 }
 
 ZoomHolder.prototype = new Element();
@@ -646,7 +714,7 @@ function Point(px,py){
 		return d;
 	}
 	
-	//Calculate distance between the point and another points
+	//Calculate angle between the point and another points
 	Point.prototype.calcAngle = function(toPoint){
 		var angleDeg = Math.atan2(toPoint.y - this.y, toPoint.x - this.x) * 180 / Math.PI;
 		return angleDeg;
