@@ -586,17 +586,17 @@ function PanIcon(){
 
 	PanIcon.prototype.highlightPan = function(){
 		document.documentElement.style.setProperty('--PanColor', 'var(--green-color)');
-		document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515green.png");
+		document.getElementById('PanIconImage1515').setAttribute("src","PanIcon1515green.png");
 	}
 
 	PanIcon.prototype.notHighlightPan = function(){
 		document.documentElement.style.setProperty('--PanColor', 'var(--blue-color)');
-		document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515.png");
+		document.getElementById('PanIconImage1515').setAttribute("src","PanIcon1515.png");
 	}
 
 	PanIcon.prototype.showActivePanIcon = function(){
 		document.documentElement.style.setProperty('--PanColor', 'var(--green-color)');
-		document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515green.png");
+		document.getElementById('PanIconImage1515').setAttribute("src","PanIcon1515green.png");
 	}
 
 	PanIcon.prototype.showNormal = function(){
