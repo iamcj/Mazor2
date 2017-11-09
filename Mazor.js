@@ -209,9 +209,7 @@ function MazorManager(){
 			this.mazor.highlightZoom();
 			return true;
 		} else {
-			console.log('hierzo');
-			this.mazor.zoomIcon.showNormal();
-			clearTimeout(zoomTimer);	
+			this.mazor.zoomIcon.showNormal();	
 			return false;
 		}
 	}
@@ -254,7 +252,6 @@ function MazorManager(){
 			return true;
 		} else {
 			this.mazor.notHighlightPan();
-			clearTimeout(panTimer);
 			return false;
 		}
 	}
@@ -370,7 +367,7 @@ function Mazor(){
 	Mazor.prototype.activatePan = function(position){
 		this.state = states.PANACTIVATED;
 		//neede because you van go from zoomActivated to Panactivated without passing ACTIVATEDCLOSABLE
-		this.deActivateZoom();
+		//this.deActivateZoom();
 		this.panIcon.showActivePanIcon();
 	}
 	
