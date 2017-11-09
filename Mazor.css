@@ -10,6 +10,9 @@ html, body{
   --purple-color: rgb(156, 12, 115);
   --lightPurple-color: rgb(236, 226, 234);
   --green-color: rgb(84, 130, 53);
+  --grey-color: grey;
+  --cursorBorder-color: var(--grey-color);
+  --cursorFill-color: var(--blue-color);
   --white-color: white;
   --ZoomColor: var(--blue-color);
   --ZoomFillColor: var(--white-color);
@@ -63,9 +66,9 @@ html, body{
   }
  
   svg.CursorBall {
-	stroke: grey;
+	stroke: var(--cursorBorder-color);
 	stroke-width:1px;
-	fill:var(--blue-color);
+	fill:var(--cursorFill-color);
 	padding-left:1px;
 	padding-top:1px;
 	width: 20px;
@@ -110,11 +113,6 @@ html, body{
 	transform: rotate(-45deg);
 }
 
-#MagnifyingGlass{
-	z-index:4;
-
-}
-
 svg.MagnifyingGlass {
 	stroke: var(--ZoomColor);
 	stroke-width:1.5px;
@@ -126,7 +124,7 @@ svg.MagnifyingGlass {
 	pointer-events:none; 
   }
 
-#MagnifyingGlass:before {
+.ZoomHolderOblique {
 	position: absolute;
 	left: -5px;
 	top: 12px;
@@ -137,10 +135,18 @@ svg.MagnifyingGlass {
 	transform: rotate(55deg);
 }
 
-#PanIcon{
-	z-index:3;
-	top:50px;
-	left:50px;
+.ZoomHolderStraight {
+	position: absolute;
+	left: -14px;
+	top: 9px;
+	content: ' ';
+	height: 4px;
+	width: 15px;
+	background-color: var(--ZoomColor);
+}
+
+.Icon{
+	z-index:4;
 }
 
 svg.PanIcon {
@@ -154,12 +160,13 @@ svg.PanIcon {
 	pointer-events:none; 
   }
 
-#PanIconImage {
+.IconImage {
 	left:3px;
 	top:3px;
+	transform: rotate(90deg);
 }
 
-#PanIconImage img {
+.IconImage img {
 	width:14px;
 	height:14px;
 }

@@ -2,14 +2,18 @@
 // Auteur:Corjan van Uffelen
 var mazorManager;
 var timer;
+var zoomTimer;
+var panTimer;
 var states = {DEACTIVATED:1, ACTIVATED:2, ACTIVATEDCLOSABLE:3, ZOOMACTIVATED:4,PANACTIVATED:5,FULLPANMODEACTIVATED:6};
 
 //settings
 var timeOutms = 400;
+var iconTimeOutms = 400;
 var cursorBallRadius = 4.5; 
 var closeRadius = 70;
 var panIconOffset = 57;
 var zoomIconOffset = 36;
+var fullPanModeRadius = 70;
 
 // Start Mazor
 function init(){
@@ -101,25 +105,66 @@ function MazorManager(){
 		this.mazor.updatePosition(position);
 	}
 
+	//temp
+	function string_of_enum(enumName,value) 
+{
+  for (var k in enumName) if (enumName[k] == value) return k;
+  return null;
+}
+	
 	//StateManagement
 	MazorManager.prototype.updatePosition = function(position){
-		
+		console.log(string_of_enum(states,this.mazor.state));
 		if(this.mazor.isDeActivated()){
 			this.checkToActivate(position);
+			//If so you will leave this function and will come into the isActivated part
 		} else if (this.mazor.isActivated()){
-			this.checkToClosable(position);
-			this.checkToHighlightZoom(position);
-			this.checkToHighlightPan(position);
+			//The mouse could be still on the x, on the zoom icon, on the panicon or outside the mazor.
+			
+			if (this.checkToClosable(position)){
+				//this.checkToHighlightZoom(position);
+				//this.checkToHighlightPan(position);
+				//this.checkZoomActivated(position);
+				//if true, it will come into the next else if
+			}
+			else {
+				//If on the x, then the rest of the checks are useless, we wait.
+			}
 		} else if (this.mazor.isActivatedClosable()){
-			this.checkToClose(position);
-			this.checkToHighlightZoom(position);
-			this.checkToHighlightPan(position);
+			clearTimeout(zoomTimer);	
+			clearTimeout(panTimer);	
+			this.checkActivatedClosable(position);
 		} else if (this.mazor.isZoomActivated()){
+			// if zoom is activated we first check if we are still in the zoomring.
+			
+			//If we are in the zoom ring we check for
+			//zoom in?
+			//zoom out?
+			if (this.cursorInZoomRing(position)){
+				this.checkZoomIn(position);
+				this.checkZoomOut(position);
+			} else {
+				// change the state to ACTIVATEDCLOSABLE en then do the checks that belong to that state.
+				this.mazor.deActivateZoom();
+				this.mazor.activateMazorClosable();
+				this.checkActivatedClosable(position);
+			}
 			
 		} else if (this.mazor.isPanActivated()){
 			
-		} else if (this.mazor.isFullPanModeActivated()){
+			if(!this.checkDeActivatePan(position)){
+				this.checkFullPanModeActivated(position);
+			} else {
+				// change the state to ACTIVATEDCLOSABLE en then do the checks that belong to that state.
+				this.mazor.deActivatePan();
+				this.mazor.activateMazorClosable();
+				this.checkActivatedClosable(position);
+			}
 			
+		} else if (this.mazor.isFullPanModeActivated()){
+			//this.checkToClose(position);
+			//this.checkToHighlightZoom(position);
+			//this.checkToHighlightPan(position);	
 		}
 		this.mazor.updatePosition(position);
 	}
@@ -130,26 +175,111 @@ function MazorManager(){
 		timer = window.setTimeout(function(){t.mazor.activateMazor();},timeOutms);
 	}
 
+	// this state can only be reached if the mazor is just activated.
 	MazorManager.prototype.checkToClosable = function(position){
 		//The mouse has to have left the center.
-		if(this.mazor.origin.calcDistance(position)> cursorBallRadius){
+		if(this.mazor.origin.calcDistance(position)> cursorBallRadius && this.mazor.isActivated()){
 			this.mazor.activateMazorClosable();
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	MazorManager.prototype.checkActivatedClosable = function(position){
+			// the mazor is closeable, so we first check to close
+		if (!this.checkToClose(position)) {
+			// if not close then chech to highlight zoom or pan.
+			if (this.checkToHighlightZoom(position)){
+				// if highlight we can launch the timer to activate the zoom.
+				this.checkZoomActivated(position);
+			} else if (this.checkToHighlightPan(position)){
+				// if highlight we can launch the timer to activate the pan.
+				this.checkPanActivated(position);	
+			}
+			
+		} else
+		{
+			//the mazor is closed , no further action.
 		}
 	}
 	
 	MazorManager.prototype.checkToHighlightZoom = function(position){
 		if(this.mazor.zoomIcon.getRealPosition().calcDistance(position) < cursorBallRadius*3){
 			this.mazor.highlightZoom();
+			return true;
 		} else {
-			this.mazor.notHighlightZoom();
+			console.log('hierzo');
+			this.mazor.zoomIcon.showNormal();
+			clearTimeout(zoomTimer);	
+			return false;
 		}
 	}
 	
+	MazorManager.prototype.checkZoomActivated = function(position){
+		//if(this.mazor.zoomIcon.getRealPosition().calcDistance(position) < cursorBallRadius*2){
+			var t = this;
+			zoomTimer = window.setTimeout(function(){t.mazor.activateZoom(position);},iconTimeOutms);
+		//} else {
+		//	clearTimeout(zoomTimer);
+		//}
+	}
+	
+	MazorManager.prototype.cursorInZoomRing= function(position){
+		var dist = this.mazor.origin.calcDistance(position);
+		if( dist < (zoomIconOffset + cursorBallRadius*3) && dist > (zoomIconOffset - cursorBallRadius*3)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	MazorManager.prototype.checkZoomIn = function(position){
+		//check position
+		//set icon
+		//change zoomlevel
+	}
+
+	MazorManager.prototype.checkZoomOut = function(position){
+		//check position
+		//set icon
+		//change zoomlevel
+
+	}
+	
 	MazorManager.prototype.checkToHighlightPan = function(position){
-		if(this.mazor.panIcon.getRealPosition().calcDistance(position) < cursorBallRadius*3){
+		//if(this.mazor.panIcon.getRealPosition().calcDistance(position) < cursorBallRadius*3){
+		if(!this.checkDeActivatePan(position)){
 			this.mazor.highlightPan();
+			return true;
 		} else {
 			this.mazor.notHighlightPan();
+			clearTimeout(panTimer);
+			return false;
+		}
+	}
+	
+	MazorManager.prototype.checkPanActivated = function(position){
+		//if(this.mazor.panIcon.getRealPosition().calcDistance(position) < cursorBallRadius*2){
+			var t = this;
+			panTimer = window.setTimeout(function(){t.mazor.activatePan(position);},iconTimeOutms);
+	//	} else {
+		//	clearTimeout(panTimer);
+		//}
+	}
+	
+	MazorManager.prototype.checkDeActivatePan = function(position){
+		
+		if(this.mazor.origin.calcDistance(position) < panIconOffset - cursorBallRadius*3){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	MazorManager.prototype.checkFullPanModeActivated = function(position){
+		if(this.mazor.origin.calcDistance(position) > fullPanModeRadius ){
+			this.mazor.activateFullPanMode();
 		}
 	}
 	
@@ -157,8 +287,12 @@ function MazorManager(){
 		//Check if the cursor is near the center;
 		if(this.mazor.origin.calcDistance(position)< cursorBallRadius){
 			this.mazor.deActivateMazor();
+			return true;
 		} else if(this.mazor.origin.calcDistance(position)> closeRadius){
 			this.mazor.deActivateMazor();
+			return true;
+		} else {
+			return false;
 		}
 	}
 	
@@ -189,7 +323,6 @@ function Mazor(){
 			this.outerCircle.rotate(this.origin.calcAngle(position)+180);
 			this.panIcon.rotateIcon(this.origin.calcAngle(position));
 			this.zoomIcon.rotateIcon(this.origin.calcAngle(position));
-			
 		}
 	}
 
@@ -209,7 +342,7 @@ function Mazor(){
 		this.outerCircle.setPosition(this.origin);
 		this.close.show();
 		this.close.setPosition(this.origin);
-		this.zoomIcon.show();
+		this.zoomIcon.showNormal();
 		this.zoomIcon.offset = zoomIconOffset;
 		this.zoomIcon.setPosition(this.origin);
 		this.zoomIcon.rotateIcon(-90);
@@ -225,6 +358,37 @@ function Mazor(){
 		this.state = states.ACTIVATEDCLOSABLE;
 	}
 	
+	Mazor.prototype.activateZoom = function(position){
+		this.state = states.ZOOMACTIVATED;	
+		this.zoomIcon.showTwoWay();
+	}
+	
+	Mazor.prototype.deActivateZoom = function(){
+		this.zoomIcon.showNormal();
+	}
+	
+	Mazor.prototype.activatePan = function(position){
+		this.state = states.PANACTIVATED;
+		//neede because you van go from zoomActivated to Panactivated without passing ACTIVATEDCLOSABLE
+		this.deActivateZoom();
+		this.panIcon.showActivePanIcon();
+	}
+	
+	Mazor.prototype.deActivatePan = function(){
+		this.panIcon.showNormal();
+	}
+	
+	Mazor.prototype.activateFullPanMode = function(position){
+		this.state = states.FULLPANMODEACTIVATED;	
+		this.panIcon.hide();
+		this.cursorBall.showFullPanMode();
+	}
+	
+	Mazor.prototype.deActivateFullPanMode = function(){
+		this.panIcon.showNormal();
+		this.cursorBall.showNormal();
+	}
+	
 	Mazor.prototype.deActivateMazor = function(){
 		this.state = states.DEACTIVATED;
 		this.MazorDeActivated.show();
@@ -233,7 +397,7 @@ function Mazor(){
 		this.outerCircle.hide();
 		this.close.hide();
 		this.panIcon.hide();
-		this.zoomIcon.hide();
+		this.zoomIcon.hideAll();
 		this.panIconImage.hide();
 	}
 	
@@ -246,7 +410,8 @@ function Mazor(){
 	}
 
 	Mazor.prototype.highlightPan = function(){
-			this.panIcon.highlightPan();
+		this.state = states.ACTIVATEDCLOSABLE
+		this.panIcon.highlightPan();
 	}
 	
 	Mazor.prototype.notHighlightPan = function(){
@@ -276,7 +441,6 @@ function Mazor(){
 	Mazor.prototype.isFullPanModeActivated = function(){
 		return (this.state == states.FULLPANMODEACTIVATED);
 	}	
-
 
 function Element(){
 	this.div;
@@ -323,32 +487,41 @@ function Element(){
 		this.div.setAttribute("style","visibility:hidden");
 	}
 	
-Element.prototype.rotate = function(deg){
-		this.div.style.webkitTransform = 'rotate('+deg+'deg)'; 
-		this.div.style.mozTransform    = 'rotate('+deg+'deg)'; 
-		this.div.style.msTransform     = 'rotate('+deg+'deg)'; 
-		this.div.style.transform       = 'rotate('+deg+'deg)'; 
-	}
+	Element.prototype.rotate = function(deg){
+			this.div.style.webkitTransform = 'rotate('+deg+'deg)'; 
+			this.div.style.mozTransform    = 'rotate('+deg+'deg)'; 
+			this.div.style.msTransform     = 'rotate('+deg+'deg)'; 
+			this.div.style.transform       = 'rotate('+deg+'deg)'; 
+		}
 
-Element.prototype.rotateIcon = function(deg){
-		this.rotate(deg);
-		this.realPosition.x = this.origin.x + Math.cos(rad(deg)) * this.offset;
-		this.realPosition.y = this.origin.y + Math.sin(rad(deg)) * this.offset;
-		var left = this.realPosition.x - (this.div.offsetWidth /2);
-		var top = this.realPosition.y - (this.div.offsetHeight /2);
-		this.div.style.left = left+'px';
-		this.div.style.top = top+'px';
-	}
+	Element.prototype.rotateIcon = function(deg){
+			this.rotate(deg);
+			this.realPosition.x = this.origin.x + Math.cos(rad(deg)) * this.offset;
+			this.realPosition.y = this.origin.y + Math.sin(rad(deg)) * this.offset;
+			var left = this.realPosition.x - (this.div.offsetWidth /2);
+			var top = this.realPosition.y - (this.div.offsetHeight /2);
+			this.div.style.left = left+'px';
+			this.div.style.top = top+'px';
+		}
 
-
-Element.prototype.getRealPosition = function(deg){
-		return this.realPosition;
-	}
-	
+	Element.prototype.getRealPosition = function(deg){
+			return this.realPosition;
+		}
+		
 CursorBall.prototype = new Element();
 function CursorBall(){
 	this.setDiv('CursorBall');	
 }
+
+	CursorBall.prototype.showFullPanMode = function(){
+		document.documentElement.style.setProperty('--cursorBorder-color', 'var(--green-color)');
+		document.documentElement.style.setProperty('--cursorFill-color', 'transparent');
+	}
+	
+	CursorBall.prototype.showNormal = function(){
+		document.documentElement.style.setProperty('--cursorBorder-color', 'var(--grey-color)');
+		document.documentElement.style.setProperty('--cursorFill-color', 'var(--blue-color)');
+	}
 
 InnerCircle.prototype = new Element();
 function InnerCircle(){
@@ -380,19 +553,50 @@ function PanIconImage(){
 	this.setDiv('PanIconImage');
 }
 
-PanIcon.prototype.highlightPan = function(){
-	document.documentElement.style.setProperty('--PanColor', 'var(--green-color)');
-	document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515green.png");
-}
+	PanIcon.prototype.highlightPan = function(){
+		document.documentElement.style.setProperty('--PanColor', 'var(--green-color)');
+		document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515green.png");
+	}
 
-PanIcon.prototype.notHighlightPan = function(){
-	document.documentElement.style.setProperty('--PanColor', 'var(--blue-color)');
-	document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515.png");
-}
+	PanIcon.prototype.notHighlightPan = function(){
+		document.documentElement.style.setProperty('--PanColor', 'var(--blue-color)');
+		document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515.png");
+	}
+
+	PanIcon.prototype.showActivePanIcon = function(){
+		document.documentElement.style.setProperty('--PanColor', 'var(--green-color)');
+		document.getElementById('PanIconImage1515').setAttribute("src","panIcon1515green.png");
+	}
+
+	PanIcon.prototype.showNormal = function(){
+		this.notHighlightPan();
+	}
 
 ZoomIcon.prototype = new Element();
 function ZoomIcon(){
 	this.setDiv('MagnifyingGlass');
+	this.zoomHolder = new ZoomHolder();
+	this.activatedZoomImage = new ActivatedZoomImage();
+}
+
+ZoomIcon.prototype.showNormal = function(){
+	this.show();
+	this.zoomHolder.show();
+	this.zoomHolder.showHolderOblique();
+	this.activatedZoomImage.hide();
+	this.notHighlightZoom();
+}
+
+ZoomIcon.prototype.hideAll = function(){
+	this.hide();
+	this.zoomHolder.hide();
+	this.activatedZoomImage.hide();
+	this.notHighlightZoom();
+}
+
+ZoomIcon.prototype.showTwoWay = function(){
+	this.zoomHolder.showHolderStraight();
+	this.activatedZoomImage.show();
 }
 
 ZoomIcon.prototype.highlightZoom = function(){
@@ -401,7 +605,28 @@ ZoomIcon.prototype.highlightZoom = function(){
 }
 
 ZoomIcon.prototype.notHighlightZoom = function(){
+	
 	document.documentElement.style.setProperty('--ZoomColor', 'var(--blue-color)');
+	document.documentElement.style.setProperty('--ZoomFillColor', 'var(--white-color)');
+}
+
+
+ActivatedZoomImage.prototype = new Element();
+function ActivatedZoomImage(){
+	this.setDiv('ActivatedZoomImage');
+}
+
+ZoomHolder.prototype = new Element();
+function ZoomHolder(){
+	this.setDiv('ZoomHolder');
+}
+
+ZoomHolder.prototype.showHolderOblique = function(){
+	this.div.className = "default Icon ZoomHolderOblique";
+}
+
+ZoomHolder.prototype.showHolderStraight = function(){
+	this.div.className = "default Icon ZoomHolderStraight";
 }
 
 function Zoom(){
