@@ -18,7 +18,7 @@ html, body{
   --ZoomFillColor: var(--white-color);
   --PanColor: var(--blue-color);
   --PanFillColor: var(--white-color);
-  --MazorColor: var(--grey-color);
+  --MazorColor: var(--blue-color);
 }
 
 .default {
