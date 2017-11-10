@@ -411,15 +411,18 @@ function Mazor(){
 	Mazor.prototype.deActivatePan = function(){
 		this.panIcon.showNormal();
 		this.showBlue();
+		
 	}
 	
 	Mazor.prototype.activateFullPanMode = function(position){
 		this.state = states.FULLPANMODEACTIVATED;	
+		this.showGreen();
 	}
 	
 	Mazor.prototype.deActivateFullPanMode = function(){
 		this.panIcon.showNormal();
 		this.cursorBall.showNormal();
+		this.showBlue();
 	}
 	
 	Mazor.prototype.deActivateMazor = function(position){
