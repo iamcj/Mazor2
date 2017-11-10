@@ -390,10 +390,12 @@ function Mazor(){
 		this.panIcon.rotateIcon(this.origin.calcAngle(position));
 		this.cursorBall.showNormal();
 		this.cursorBall.updatePosition(position);
+		this.showPurple();
 	}
 	
 	Mazor.prototype.deActivateZoom = function(){
 		this.zoomIcon.showNormal();
+		this.showBlue();
 	}
 	
 	Mazor.prototype.activatePan = function(position){
@@ -403,10 +405,12 @@ function Mazor(){
 		//this.panIcon.showActivePanIcon();
 		this.panIcon.hideAll();
 		this.cursorBall.showFullPanMode();
+		this.showGreen();
 	}
 	
 	Mazor.prototype.deActivatePan = function(){
 		this.panIcon.showNormal();
+		this.showBlue();
 	}
 	
 	Mazor.prototype.activateFullPanMode = function(position){
@@ -450,6 +454,18 @@ function Mazor(){
 	
 	Mazor.prototype.pan = function(position){
 	
+	}
+	
+	Mazor.prototype.showPurple = function(position){
+		document.documentElement.style.setProperty('--MazorColor', 'var(--purple-color)');
+	}
+	
+	Mazor.prototype.showGreen = function(position){
+		document.documentElement.style.setProperty('--MazorColor', 'var(--green-color)');
+	}
+	
+	Mazor.prototype.showBlue = function(position){
+		document.documentElement.style.setProperty('--MazorColor', 'var(--blue-color)');
 	}
 	
 	Mazor.prototype.isActivated = function(){
