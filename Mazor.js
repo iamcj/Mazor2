@@ -8,10 +8,10 @@ var panTimer;
 var panModeTimer;
 var states = {DEACTIVATED:1, ACTIVATED:2, ACTIVATEDCLOSABLE:3, ZOOMACTIVATED:4,PANACTIVATED:5,FULLPANMODEACTIVATED:6};
 var mouseLatLng;
-var lastMousePosition;
 var previousPosition;
 var mouseDifLat;
 var mouseDifLng;
+var zoomAngle;
 
 //settings
 var timeOutms = 400;
@@ -70,11 +70,6 @@ function Canvas(){
 	this.map;
 	this.setHeight();
 	this.loadMaps();
-	this.mazorX;
-	this.mazorY;
-	this.centerLatLng;
-	this.canvasWidth;
-	this.canvasHeight;
 
 }
 
@@ -96,12 +91,7 @@ function Canvas(){
 		//zoomControl: false
 		});
 		
-		var marker = new google.maps.Marker({
-          position: latLng,
-          map: this.map,
-          title: 'Hello World!'
-        });
-		lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
+		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
 		this.map.addListener('mousemove', function (event) {
               mouseLatLng = event.latLng;
 			//  mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
@@ -109,160 +99,41 @@ function Canvas(){
           });
 	}
 
-	Canvas.prototype.zoomCanvasIn = function(originLatLng){
-		//als je bij het activeren de afstand vast stelt tussen de mazor en het center van de kaart kun je vanuit daar toch altijd die nieuwe center berekenen?
-		//Met deze tussenstap wordt de berekening makkelijker, maar waarschijnlijk gaat hij nu schuiven. We gaan het zien.
-		
-		
-		//var lng = this.centerLatLng.lng() + (zoomFactor * (this.mazorX /100));
-		//var lat = this.centerLatLng.lat() + (zoomFactor * (this.mazorY /100));
-		//var lng = this.centerLatLng.lng() + (((this.canvasWidth * (zoomFactor/100))-this.canvasWidth)/4) ;
-		//canvas width en height worden gezet per zoomLevel
-		//var lat = this.centerLatLng.lat() - (((this.canvasHeight * (zoomFactor/100)) - this.canvasHeight)/4) ;
-		i = i +1;
-		var lng = this.centerLatLng.lng() + (0.028* i*((1/(zoomFactor/100)))) ;
-		var lat = this.centerLatLng.lat() - (0.0249* i*(1/(zoomFactor/100)));
-		var latLng = new google.maps.LatLng(lat,lng);
-	
-		//console.log(this.mazorX,  (((this.mazorX* (zoomFactor/100))-this.mazorX)) );
-		this.map.setCenter(latLng);
-		this.map.setCenter(latLng);
-		this.zoomCanvas(originLatLng);
-		
-	}
-	
-	Canvas.prototype.zoomCanvasOut = function(originLatLng){
-		//this.zoomCanvas(originLatLng);
-		var lng = this.centerLatLng.lng() - (((this.mazorX* (zoomFactor/100))-this.mazorX)) ;
-		//canvas width en height worden gezet per zoomLevel
-		var lat = this.centerLatLng.lat() + (((this.mazorY * (zoomFactor/100)) - this.mazorY)) ;
-		var latLng = new google.maps.LatLng(lat,lng);
-		//console.log(latLng.lat(),latLng.lng());
-		//this.map.setCenter(latLng);
-	}
-	
-	Canvas.prototype.zoomCanvas = function(originLatLng){
-		if (zoomFactor >  199) {
-			zoomFactor = 100;
-			zoomLevel = zoomLevel +1;
-			this.zoom(zoomLevel);
-		} else if(zoomFactor < 100){
-			zoomFactor = 200 - zoomChange;
-			zoomLevel = zoomLevel -1;
-			this.zoom(zoomLevel);
+	Canvas.prototype.zoomIn = function(angle){
+		if (!zoomAngle || zoomAngle <30.1 || angle > zoomAngle){
+			zoomAngle = angle+1;
 		}
-		
-		if(zoomFactor == 100|| zoomFactor == (200-zoomChange)){
-			this.setMazorOrigin(originLatLng);
-		}
-		document.getElementById('Canvas').style.setProperty('zoom', zoomFactor + '%');
-	}
-	
-	Canvas.prototype.setMazorOrigin = function(originLatLng){
-		this.centerLatLng = new google.maps.LatLng(this.map.getCenter().lat(),this.map.getCenter().lng());
-		this.mazorX = originLatLng.lng() - this.map.getCenter().lng();
-		this.mazorY = originLatLng.lat() - this.map.getCenter().lat();	
-		
-		var markerBounds = this.map.getBounds();
-		this.canvasHeight = this.getHeight();
-		this.canvasWidth = this.getWidth();
 
-	}
+		if (angle < zoomAngle -30){
+			var lat = (mazorManager.getMazorLatLng().lat() - this.map.getCenter().lat())/2;
+			var lng = (mazorManager.getMazorLatLng().lng() - this.map.getCenter().lng())/2;
+			this.map.setZoom(this.map.getZoom()+1);
+			this.panLatLng( this.map.getCenter().lat() + lat,this.map.getCenter().lng() + lng);
+			
+			zoomAngle = angle;
+			
+		}
 		
+	}
+	
+	Canvas.prototype.zoomOut = function(angle){
+	
+		if (!zoomAngle|| zoomAngle >329.9 || angle < zoomAngle){
+			zoomAngle = angle-1;
+		}
+
+		if (angle > zoomAngle + 30){
+			var lat = (mazorManager.getMazorLatLng().lat() - this.map.getCenter().lat());
+			var lng = (mazorManager.getMazorLatLng().lng() - this.map.getCenter().lng());
+			this.map.setZoom(this.map.getZoom()-1);
+			this.panLatLng( this.map.getCenter().lat() - lat,this.map.getCenter().lng() - lng);
+			zoomAngle =angle;
+		}
+		
+	}
 	
 	Canvas.prototype.zoom = function(zoomLevel){
 		this.map.setZoom(zoomLevel);
-	}
-
-	Canvas.prototype.getHeight = function(){
-		//console.log((this.map.getBounds().getNorthEast().lat(),this.map.getBounds().getSouthWest().lat())/2, this.map.getCenter().lat());
-		return this.map.getBounds().getNorthEast().lat() - this.map.getBounds().getSouthWest().lat();
-	}	
-	
-	Canvas.prototype.getWidth = function(){
-		//console.log(this.map.getBounds().getNorthEast().lng(),this.map.getBounds().getSouthWest().lng());
-		return this.map.getBounds().getNorthEast().lng() - this.map.getBounds().getSouthWest().lng();
-	}	
-	
-	//Zoom 
-	//Based  on the current centerpoint, you can define a min and max bound of min and max zoom level.
-	Canvas.prototype.zoom2 = function(zoomFactor, originLatLng){
-		var markerBounds = this.map.getBounds();
-		var leftBottom = markerBounds.getSouthWest();
-		var rightTop = markerBounds.getNorthEast();
-		
-		//Make everything positive
-		leftBottom = this.transformToPoint(leftBottom);
-		rightTop = this.transformToPoint(rightTop);
-		
-		var canvasWidth = rightTop.x - leftBottom.x;
-		var canvasHeight = rightTop.y - leftBottom.y;
-		var canvasWidthNew = canvasWidth/zoomFactor;
-		var canvasHeightNew = canvasHeight/zoomFactor;
-
-		var leftBottomNew = new Point();
-		//create new leftBottom point
-		leftBottomNew.x = leftBottom.x + (canvasWidth - canvasWidthNew)/2;
-		leftBottomNew.y = leftBottom.y + (canvasHeight - canvasHeightNew)/2;
-		
-		//MazorOrigin
-		var MazorOrigin = this.transformToPoint(originLatLng);
-		
-		//calculate tmp new MazorOrigin
-		var MazorNewX = leftBottomNew.x + ((MazorOrigin.x - leftBottom.x)/zoomFactor);
-		var MazorNewY = leftBottomNew.y + ((MazorOrigin.y - leftBottom.y)/zoomFactor);	
-		
-		//calculate shift
-		var shiftX = MazorOrigin.x - MazorNewX;
-		var shiftY = MazorOrigin.y - MazorNewY;
-		
-		//shiftX is always possible
-		leftBottomNew.x = leftBottomNew.x + shiftX;
-		
-		//shiftY is bound by 0 to 180
-		tmpPointY = leftBottomNew.y + shiftY;
-		if(tmpPointY <0){
-			shiftY = shiftY - tmpPointY;
-		}
-		leftBottomNew.y = leftBottomNew.y + shiftY;
-		
-		var topRightNew = new Point();
-		topRightNew.x = leftBottomNew.x + canvasWidthNew;
-		topRightNew.y = leftBottomNew.y + canvasHeightNew;
-
-		//Check and shift if bound > 180 
-		if (topRightNew.y >180){
-			shiftY = 180-topRightNew.y;
-		} else {
-			shiftY =0;
-		}
-		
-		topRightNew.y = topRightNew.y + shiftY;
-		leftBottomNew.y = leftBottomNew.y + shiftY;
-		
-		leftBottomNew = this.transformToLatLng(leftBottomNew);
-		topRightNew = this.transformToLatLng(topRightNew);
-		
-		
-		var latLngBounds = new google.maps.LatLngBounds();
-		
-		latLngBounds.extend(topRightNew);
-		latLngBounds.extend(leftBottomNew);
-		
-		this.map.fitBounds(latLngBounds,0);
-		//console.log(markerBounds.getSouthWest().lat(),this.map.getBounds().getSouthWest().lat());
-
-	}
-
-	Canvas.prototype.transformToPoint = function(markerBound){
-		var p = new Point();
-		p.x = markerBound.lng() +  180;
-		p.y = markerBound.lat() + 90;
-		return p;
-	}
-	
-	Canvas.prototype.transformToLatLng = function(point){
-		return new google.maps.LatLng(point.y -90,point.x -180 );
 	}
 	
 	//Pan
@@ -347,7 +218,7 @@ function MazorManager(){
 			
 			if (this.checkToClosable(position)){
 				//Here so it is performed once
-				this.canvas.setMazorOrigin(this.mazor.originLatLng);
+				//this.canvas.setMazorOrigin(this.mazor.originLatLng);
 				//this.checkToHighlightZoom(position);
 				//this.checkToHighlightPan(position);
 				//this.checkZoomActivated(position);
@@ -448,11 +319,12 @@ function MazorManager(){
 			} else if (this.checkToHighlightPan(position)){
 				// if highlight we can launch the timer to activate the pan.
 				this.checkPanActivated(position);	
-			}
+			} 
 			
 		} else
 		{
-			//the mazor is closed , no further action.
+			//the mazor is closed , start timer again in mazor.deActivateMazor
+			
 		}
 	}
 	
@@ -492,12 +364,14 @@ function MazorManager(){
 			//set icon
 			this.mazor.zoomIcon.showPlus();
 			zoomFactor = zoomFactor + zoomChange;
+			this.canvas.zoomIn(getRealAngle(this.mazor.origin.calcAngle(position)));
 			//this.canvas.zoomCanvasIn(this.mazor.originLatLng);
 			//change zoomlevel
 			//var zoomFactor = angle/this.mazor.zoomDegrees ;
 			
 		} else {
 			this.mazor.zoomIcon.showMin();
+			this.canvas.zoomOut(getRealAngle(this.mazor.origin.calcAngle(position)));
 			//change zoomlevel
 			zoomFactor = zoomFactor - zoomChange;
 			//this.canvas.zoomCanvasOut(this.mazor.originLatLng);
@@ -547,7 +421,7 @@ function MazorManager(){
 	MazorManager.prototype.checkFullPanModeActivated = function(position){
 		if(this.mazor.origin.calcDistance(position) > fullPanModeRadius ){
 			this.lastPosition = mouseLatLng;
-			this.mazor.activateFullPanMode();
+			this.mazor.activateFullPanMode(position);
 		}
 	}
 	
@@ -569,10 +443,12 @@ function MazorManager(){
 		//console.log(this.canvas.getCenter().lng(),this.canvas.getCenter().lat(),lng, lat);
 		//console.log(mouseDifLat, mouseDifLng);
 		// this is to move canvas to center
-		if (this.directionCompare(oldDirection,direction)&& (speed < oldSpeed||speed == 0 )) {
+		panModeTimer = window.setInterval(function(){t.canvas.pan(direction,speed);},panInterval);
+		if (this.directionCompare(oldDirection,direction,position)&& (speed < oldSpeed||speed == 0 )) {
+			clearInterval(panModeTimer);
 			this.canvas.panLatLng(this.canvas.getCenter().lat() - mouseDifLat,this.canvas.getCenter().lng() - mouseDifLng);
 		} else {
-			panModeTimer = window.setInterval(function(){t.canvas.pan(direction,speed);},panInterval);
+			
 		}
 		//TODO is muis naar center kunnen bewegen zonder dat je in een nieuwe staat komt.
 		oldDirection = direction;
@@ -602,13 +478,20 @@ function MazorManager(){
 		return this.canvas.point2LatLng(point);
 	}
 	
-	MazorManager.prototype.directionCompare = function(oldD, newD){
-		console.log(oldD,newD);
-		if (newD < oldD +0.5 && newD > oldD -0.5){
+	MazorManager.prototype.directionCompare = function(oldD, newD, position){
+		if (this.mazor.origin.calcDistance(position) < closeRadius) {
 			return true;
 		} else {
-			return false;
+			if (newD < oldD +0.5 && newD > oldD -0.5){
+				return true;
+			} else {
+				return false;
+			}
 		}
+	}
+	
+	MazorManager.prototype.getMazorLatLng = function(){
+		return this.mazor.originLatLng;
 	}
 
 //Start of Mazor
@@ -623,6 +506,7 @@ function Mazor(){
 	this.close = new Close();
 	this.panIcon = new PanIcon();
 	this.zoomIcon = new ZoomIcon();
+	this.panLine = new PanLine();
 	this.zoomDegrees;
 }
 
@@ -637,6 +521,9 @@ function Mazor(){
 			this.outerCircle.rotate(this.origin.calcAngle(position)+180);
 			this.panIcon.rotateIcon(this.origin.calcAngle(position));
 			this.zoomIcon.rotateIcon(this.origin.calcAngle(position));
+			if (this.isFullPanModeActivated){
+				this.panLine.drawLine(this.origin,position);
+			}
 		}
 	}
 
@@ -673,7 +560,10 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.activateZoom = function(position){
-		this.state = states.ZOOMACTIVATED;	
+		zoomAngle = null;
+		this.state = states.ZOOMACTIVATED;
+		console.log("hierzp");
+		this.zoomIcon.highlightZoom();		
 		this.zoomIcon.showTwoWay();
 		this.zoomDegrees = this.origin.calcAngle(position);
 		// extra stuff for if you come from panmode
@@ -707,14 +597,17 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.activateFullPanMode = function(position){
+		this.zoomIcon.hideAll();
 		this.state = states.FULLPANMODEACTIVATED;		
 		this.showGreen();
+		this.panLine.show();
 	}
 	
 	Mazor.prototype.deActivateFullPanMode = function(){
 		this.panIcon.showNormal();
 		this.cursorBall.showNormal();
 		this.showBlue();
+		this.panLine.hide();
 	}
 	
 	Mazor.prototype.deActivateMazor = function(position){
@@ -727,6 +620,7 @@ function Mazor(){
 		this.panIcon.hideAll();
 		this.zoomIcon.hideAll();
 		this.updatePosition(this.origin);
+		mazorManager.checkToActivate();
 	}
 	
 	Mazor.prototype.highlightZoom = function(){
@@ -740,7 +634,7 @@ function Mazor(){
 
 	Mazor.prototype.highlightPan = function(){
 		this.panIcon.highlightPan();
-		this.notHighlightZoom();
+		//this.notHighlightZoom();
 	}
 	
 	Mazor.prototype.notHighlightPan = function(){
@@ -1018,6 +912,45 @@ ZoomHolder.prototype.showHolderStraight = function(){
 	this.div.className = "default Icon ZoomHolderStraight";
 }
 
+PanLine.prototype = new Element();
+function PanLine(){
+	this.setDiv('PanLine');
+}
+
+function lineDistance(x, y, x0, y0){
+    return Math.sqrt((x -= x0) * x + (y -= y0) * y);
+};
+
+PanLine.prototype.drawLine = function (origin, position) {
+  var pointA = origin;
+  var pointB = position;
+  var angle = origin.calcAngle(position);
+  var distance = origin.calcDistance(position);
+  
+  var a = Math.cos(rad(getRealAngle(angle)))*distance;
+  var xdif = 0.5 * (distance - a);
+  var ydif = (position.y - origin.y) /2;
+
+  this.div.style.setProperty('transform', 'rotate(' + angle + 'deg)');
+  this.div.style.setProperty('width', distance + 'px');
+
+  // Set Position
+  this.div.style.setProperty('top', origin.y + ydif +'px');
+  this.div.style.setProperty('left', origin.x - xdif +'px');
+/*   if(position.y < origin.y) {
+	 
+  } else {
+	 this.div.style.setProperty('top', position.y +ydif +'px');
+  } */
+/*    if(pointB.x < pointA.x) {
+	 
+  } else {
+	 this.div.style.setProperty('left', origin.x  + xdif +'px');
+  
+  } */
+}
+
+
 function Zoom(){
 	this.min = 1;
 	this.max = 22;
@@ -1069,3 +1002,154 @@ function getRealAngle(x) {
 }
 
 
+/* 	Canvas.prototype.getHeight = function(){
+		//console.log((this.map.getBounds().getNorthEast().lat(),this.map.getBounds().getSouthWest().lat())/2, this.map.getCenter().lat());
+		return this.map.getBounds().getNorthEast().lat() - this.map.getBounds().getSouthWest().lat();
+	}	
+	
+	Canvas.prototype.getWidth = function(){
+		//console.log(this.map.getBounds().getNorthEast().lng(),this.map.getBounds().getSouthWest().lng());
+		return this.map.getBounds().getNorthEast().lng() - this.map.getBounds().getSouthWest().lng();
+	}	
+	
+	//Zoom 
+	//Based  on the current centerpoint, you can define a min and max bound of min and max zoom level.
+	Canvas.prototype.zoom2 = function(zoomFactor, originLatLng){
+		var markerBounds = this.map.getBounds();
+		var leftBottom = markerBounds.getSouthWest();
+		var rightTop = markerBounds.getNorthEast();
+		
+		//Make everything positive
+		leftBottom = this.transformToPoint(leftBottom);
+		rightTop = this.transformToPoint(rightTop);
+		
+		var canvasWidth = rightTop.x - leftBottom.x;
+		var canvasHeight = rightTop.y - leftBottom.y;
+		var canvasWidthNew = canvasWidth/zoomFactor;
+		var canvasHeightNew = canvasHeight/zoomFactor;
+
+		var leftBottomNew = new Point();
+		//create new leftBottom point
+		leftBottomNew.x = leftBottom.x + (canvasWidth - canvasWidthNew)/2;
+		leftBottomNew.y = leftBottom.y + (canvasHeight - canvasHeightNew)/2;
+		
+		//MazorOrigin
+		var MazorOrigin = this.transformToPoint(originLatLng);
+		
+		//calculate tmp new MazorOrigin
+		var MazorNewX = leftBottomNew.x + ((MazorOrigin.x - leftBottom.x)/zoomFactor);
+		var MazorNewY = leftBottomNew.y + ((MazorOrigin.y - leftBottom.y)/zoomFactor);	
+		
+		//calculate shift
+		var shiftX = MazorOrigin.x - MazorNewX;
+		var shiftY = MazorOrigin.y - MazorNewY;
+		
+		//shiftX is always possible
+		leftBottomNew.x = leftBottomNew.x + shiftX;
+		
+		//shiftY is bound by 0 to 180
+		tmpPointY = leftBottomNew.y + shiftY;
+		if(tmpPointY <0){
+			shiftY = shiftY - tmpPointY;
+		}
+		leftBottomNew.y = leftBottomNew.y + shiftY;
+		
+		var topRightNew = new Point();
+		topRightNew.x = leftBottomNew.x + canvasWidthNew;
+		topRightNew.y = leftBottomNew.y + canvasHeightNew;
+
+		//Check and shift if bound > 180 
+		if (topRightNew.y >180){
+			shiftY = 180-topRightNew.y;
+		} else {
+			shiftY =0;
+		}
+		
+		topRightNew.y = topRightNew.y + shiftY;
+		leftBottomNew.y = leftBottomNew.y + shiftY;
+		
+		leftBottomNew = this.transformToLatLng(leftBottomNew);
+		topRightNew = this.transformToLatLng(topRightNew);
+		
+		
+		var latLngBounds = new google.maps.LatLngBounds();
+		
+		latLngBounds.extend(topRightNew);
+		latLngBounds.extend(leftBottomNew);
+		
+		this.map.fitBounds(latLngBounds,0);
+		//console.log(markerBounds.getSouthWest().lat(),this.map.getBounds().getSouthWest().lat());
+
+	}
+
+	Canvas.prototype.transformToPoint = function(markerBound){
+		var p = new Point();
+		p.x = markerBound.lng() +  180;
+		p.y = markerBound.lat() + 90;
+		return p;
+	}
+	
+	Canvas.prototype.transformToLatLng = function(point){
+		return new google.maps.LatLng(point.y -90,point.x -180 );
+	} */
+
+	/* 	Canvas.prototype.zoomCanvasIn = function(originLatLng){
+		//als je bij het activeren de afstand vast stelt tussen de mazor en het center van de kaart kun je vanuit daar toch altijd die nieuwe center berekenen?
+		//Met deze tussenstap wordt de berekening makkelijker, maar waarschijnlijk gaat hij nu schuiven. We gaan het zien.
+		
+		
+		//var lng = this.centerLatLng.lng() + (zoomFactor * (this.mazorX /100));
+		//var lat = this.centerLatLng.lat() + (zoomFactor * (this.mazorY /100));
+		//var lng = this.centerLatLng.lng() + (((this.canvasWidth * (zoomFactor/100))-this.canvasWidth)/4) ;
+		//canvas width en height worden gezet per zoomLevel
+		//var lat = this.centerLatLng.lat() - (((this.canvasHeight * (zoomFactor/100)) - this.canvasHeight)/4) ;
+		i = i +1;
+		var lng = this.centerLatLng.lng() + (0.028* i*((1/(zoomFactor/100)))) ;
+		var lat = this.centerLatLng.lat() - (0.0249* i*(1/(zoomFactor/100)));
+		var latLng = new google.maps.LatLng(lat,lng);
+	
+		//console.log(this.mazorX,  (((this.mazorX* (zoomFactor/100))-this.mazorX)) );
+		this.map.setCenter(latLng);
+		this.map.setCenter(latLng);
+		this.zoomCanvas(originLatLng);
+		
+	}
+	
+	Canvas.prototype.zoomCanvasOut = function(originLatLng){
+		//this.zoomCanvas(originLatLng);
+		var lng = this.centerLatLng.lng() - (((this.mazorX* (zoomFactor/100))-this.mazorX)) ;
+		//canvas width en height worden gezet per zoomLevel
+		var lat = this.centerLatLng.lat() + (((this.mazorY * (zoomFactor/100)) - this.mazorY)) ;
+		var latLng = new google.maps.LatLng(lat,lng);
+		//console.log(latLng.lat(),latLng.lng());
+		//this.map.setCenter(latLng);
+	}
+	
+	Canvas.prototype.zoomCanvas = function(originLatLng){
+		if (zoomFactor >  199) {
+			zoomFactor = 100;
+			zoomLevel = zoomLevel +1;
+			this.zoom(zoomLevel);
+		} else if(zoomFactor < 100){
+			zoomFactor = 200 - zoomChange;
+			zoomLevel = zoomLevel -1;
+			this.zoom(zoomLevel);
+		}
+		
+		if(zoomFactor == 100|| zoomFactor == (200-zoomChange)){
+			this.setMazorOrigin(originLatLng);
+		}
+		document.getElementById('Canvas').style.setProperty('zoom', zoomFactor + '%');
+	} */
+	
+	/* 	Canvas.prototype.setMazorOrigin = function(originLatLng){
+		this.centerLatLng = new google.maps.LatLng(this.map.getCenter().lat(),this.map.getCenter().lng());
+		this.mazorX = originLatLng.lng() - this.map.getCenter().lng();
+		this.mazorY = originLatLng.lat() - this.map.getCenter().lat();	
+		
+		var markerBounds = this.map.getBounds();
+		//this.canvasHeight = this.getHeight();
+		//this.canvasWidth = this.getWidth();
+
+	}
+		 */

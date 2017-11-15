@@ -22,7 +22,6 @@ html, body{
 }
 
 .default {
-	position:absolute;	
 	z-index: 2;
 	position:absolute;
 	visibility:hidden;
@@ -170,7 +169,12 @@ svg.PanIcon {
 .IconImage img {
 	width:14px;
 	height:14px;
+}	
+
+.line {
+  width: 100%;
+  color: var(--PanColor);
+  height: 1px;
+  background-color: var(--PanColor);
 }
-
-
 
