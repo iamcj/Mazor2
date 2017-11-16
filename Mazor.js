@@ -34,6 +34,7 @@ var oldSpeed = -1;
 // Start Mazor
 function init(){
   mazorManager = new MazorManager();
+ 
 }
 
 //Model class
@@ -988,6 +989,62 @@ function Point(px,py){
 			return false;
 		}
 	}
+	
+//Data Class
+function TaskManager(){
+	this.userId = new Date().getUTCMilliseconds();
+	var tasks = new Map();
+
+	//Task definition
+	tasks.set(1,"Taak1");
+	tasks.set(2,"Taak2");
+}
+
+	Task.prototype.newTask = function(taskId){
+	    return new Task(userID,taskId,taskName);
+	}
+	
+	
+function Task(taskUserId, taskId, taskName){
+	this.userId = taskUserID;
+	this.number = taskId;
+	this.startTime;
+	this.name = taskName;
+	this.clicks;
+	this.movement;
+	this.totalTime;
+	this.statusLog;
+
+}
+
+	Task.prototype.start = function(){
+	    this.startTime = Date.now();
+	}
+	
+	Task.prototype.stop = function(){
+	    this.totalTime = Date.now() - startTime;
+	}
+	
+	Task.prototype.addStatus = function(status){
+	    this.statusLog = this.statusLog + (Date.now()) + ";" + status + '\n'
+	}
+	
+	Task.prototype.addClick = function(){
+	    this.clicks = this.clicks + 1;
+	}
+
+	Task.prototype.addMovement = function(movement){
+	    this.clicks = this.movement + movement;
+	}
+	
+	Task.prototype.send = function(){
+	   Email.send("corjanLeiden@gmail.com", "corjan@gmail.com",	this.number + this.name, this.getBody(), "smtp.gmail.com", "CorjanLeiden@gmail.com", "Uffel1Uffel1");   
+	}
+	
+	Task.prototype.getBody = function(){
+	   //assamble data, create csv format.  
+	}
+
 
 //Radians
 function rad(x) {
