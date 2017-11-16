@@ -178,3 +178,8 @@ svg.PanIcon {
   background-color: var(--PanColor);
 }
 
+.spacer {
+  width: 7px;
+  height: 1px;
+}
+

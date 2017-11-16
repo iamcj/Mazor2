@@ -600,14 +600,14 @@ function Mazor(){
 		this.zoomIcon.hideAll();
 		this.state = states.FULLPANMODEACTIVATED;		
 		this.showGreen();
-		this.panLine.show();
+		this.panLine.showAll();
 	}
 	
 	Mazor.prototype.deActivateFullPanMode = function(){
 		this.panIcon.showNormal();
 		this.cursorBall.showNormal();
 		this.showBlue();
-		this.panLine.hide();
+		this.panLine.hideAll();
 	}
 	
 	Mazor.prototype.deActivateMazor = function(position){
@@ -915,11 +915,18 @@ ZoomHolder.prototype.showHolderStraight = function(){
 PanLine.prototype = new Element();
 function PanLine(){
 	this.setDiv('PanLine');
+	this.panLineDiv = new PanLineDiv();
 }
 
-function lineDistance(x, y, x0, y0){
-    return Math.sqrt((x -= x0) * x + (y -= y0) * y);
-};
+PanLine.prototype.showAll = function () {
+	this.show();
+	this.panLineDiv.show();
+}
+
+PanLine.prototype.hideAll = function () {
+	this.hide();
+	this.panLineDiv.hide();
+}
 
 PanLine.prototype.drawLine = function (origin, position) {
   var pointA = origin;
@@ -933,21 +940,16 @@ PanLine.prototype.drawLine = function (origin, position) {
 
   this.div.style.setProperty('transform', 'rotate(' + angle + 'deg)');
   this.div.style.setProperty('width', distance + 'px');
+  this.panLineDiv.div.style.setProperty('width', distance - 10 + 'px');
 
   // Set Position
   this.div.style.setProperty('top', origin.y + ydif +'px');
   this.div.style.setProperty('left', origin.x - xdif +'px');
-/*   if(position.y < origin.y) {
-	 
-  } else {
-	 this.div.style.setProperty('top', position.y +ydif +'px');
-  } */
-/*    if(pointB.x < pointA.x) {
-	 
-  } else {
-	 this.div.style.setProperty('left', origin.x  + xdif +'px');
-  
-  } */
+}
+
+PanLineDiv.prototype = new Element();
+function PanLineDiv(){
+	this.setDiv('PanLineDiv');
 }
 
 
