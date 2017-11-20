@@ -993,20 +993,45 @@ function Point(px,py){
 //Data Class
 function TaskManager(){
 	this.userId = new Date().getUTCMilliseconds();
-	var tasks = new Map();
+	var tasksDescriptions = new Map();
+	var tasks = [];
 
 	//Task definition
-	tasks.set(1,"Taak1");
-	tasks.set(2,"Taak2");
+	tasksDescriptions.set(1,"Taak1");
+	tasksDescriptions.set(2,"Taak2");
 }
 
-	Task.prototype.newTask = function(taskId){
-	    return new Task(userID,taskId,taskName);
+	TaskManager.prototype.newTask = function(taskId){
+	    var task = new Task(userID,taskId,taskName);
+		this.tasks.set(taskId,task);
+		return task;
+	}
+
+	TaskManager.prototype.send = function(){
+	   Email.send("corjanLeiden@gmail.com", "corjan@gmail.com",	this.number + this.name, this.getTaskData() + "\r\n" + this.getStatusLog(), "smtp.gmail.com", "CorjanLeiden@gmail.com", "Uffel1Uffel1");   
+	}
+	
+	TaskManager.prototype.getTaskData = function(){
+		//assamble data, create csv format.  
+		var data = "UserId;TaskNumber;TaskName;StartTime;TotalTime;Clicks;Movement" + "\r\n"
+		for(var task in this.tasks){
+			data = data + task.userId + ";" +task.number+ ";" +task.name+ ";" +task.startTime+ ";" +task.totalTime+ ";" +task.clicks+ ";" +task.movement + "\r\n";
+		}			
+		return data;
+	}
+	
+	TaskManager.prototype.getStatusLog = function(){
+	   //assamble data, create csv format.  
+	   	var statusLog = "UserId;TaskNumber;TaskName;Time;Status" + "\r\n"
+		for(var task in this.tasks){
+			statusLog = statusLog + task.userId + ";" +task.number+ ";" +task.name+ ";"  +task.statusLog+ "\r\n";
+		}			
+		return statusLog;
 	}
 	
 	
 function Task(taskUserId, taskId, taskName){
-	this.userId = taskUserID;
+	this.userId = taskUserId;
 	this.number = taskId;
 	this.startTime;
 	this.name = taskName;
@@ -1026,7 +1051,7 @@ function Task(taskUserId, taskId, taskName){
 	}
 	
 	Task.prototype.addStatus = function(status){
-	    this.statusLog = this.statusLog + (Date.now()) + ";" + status + '\n'
+	    this.statusLog = this.statusLog + (Date.now()) + ";" + status + "\r\n";
 	}
 	
 	Task.prototype.addClick = function(){
@@ -1037,14 +1062,6 @@ function Task(taskUserId, taskId, taskName){
 	    this.clicks = this.movement + movement;
 	}
 	
-	Task.prototype.send = function(){
-	   Email.send("corjanLeiden@gmail.com", "corjan@gmail.com",	this.number + this.name, this.getBody(), "smtp.gmail.com", "CorjanLeiden@gmail.com", "Uffel1Uffel1");   
-	}
-	
-	Task.prototype.getBody = function(){
-	   //assamble data, create csv format.  
-	}
-
 
 //Radians
 function rad(x) {

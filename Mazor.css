@@ -22,7 +22,7 @@ html, body{
 }
 
 .default {
-	z-index: 2;
+	z-index: 3;
 	position:absolute;
 	visibility:hidden;
 	pointer-events:none; 
@@ -61,7 +61,7 @@ html, body{
   
 /* Activated */
  #CursorBall  {
-	 z-index:3;
+	 z-index:4;
 
   }
  
@@ -181,5 +181,24 @@ svg.PanIcon {
 .spacer {
   width: 7px;
   height: 1px;
+}
+
+#Task {
+	z-index: 2;
+	position:absolute;
+	left: 15px;
+	top: 15px;
+	height: 35px;
+	width: 150px;
+	background-color: white;
+	border: 1px solid grey;
+	border-radius: 5px;
+	display: table;
+}
+#TaskText {
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+	font-family: arial;
 }
 
