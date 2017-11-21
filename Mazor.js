@@ -15,7 +15,7 @@ var zoomAngle;
 
 //settings
 var timeOutms = 400;
-var iconTimeOutms = 200;
+var iconTimeOutms = 20;
 var cursorBallRadius = 4.5; 
 var closeRadius = 70;
 var panIconOffset = 57;
@@ -45,6 +45,7 @@ function Mouse(){
 	// To show mazor on first move
 	Mouse.prototype.init = function(){
 		document.addEventListener('mousemove', onMouseUpdateInit, false);
+		document.addEventListener('click', onMouseClick, false);
 	}
 
 	// To show mazor on first move
@@ -57,15 +58,22 @@ function Mouse(){
 
 	// For the rest of the moving
 	function onMouseUpdate(e) {
-		position = new Point(e.pageX,e.pageY);
+		//var position = setPosition(new Point(e.pageX,e.pageY));
+		var position= new Point(e.pageX, e.pageY);
 		var oldLat = mazorManager.point2LatLng(position);
 		mouseDifLat = oldLat.lat() - mazorManager.point2LatLng(previousPosition).lat();
 		mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
 		mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
 		mazorManager.updatePosition(position);
-		previousPosition = position;
 	}
 
+		// For the rest of the moving
+	function onMouseClick(e) {
+		var position = new Point(e.pageX,e.pageY);
+		mazorManager.checkToActivate(position);
+	}
+	
+	
 //View Class
 function Canvas(){
 	this.map;
@@ -89,7 +97,7 @@ function Canvas(){
 		center: latLng,
 		mapTypeId: google.maps.MapTypeId.ROADMAP,
 		gestureHandling: 'none',
-		//zoomControl: false
+		zoomControl: false
 		});
 		
 		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
@@ -211,7 +219,7 @@ function MazorManager(){
 	MazorManager.prototype.updatePosition = function(position){
 		//console.log(string_of_enum(states,this.mazor.state));
 		if(this.mazor.isDeActivated()){
-			this.checkToActivate(position);
+			//this.checkToActivate(position);
 			//If so you will leave this function and will come into the isActivated part
 		} else if (this.mazor.isActivated()){
 			
@@ -297,6 +305,7 @@ function MazorManager(){
 		clearTimeout(timer);
 		var t = this;
 		timer = window.setTimeout(function(){t.mazor.activateMazor();},timeOutms);
+	// 	this.mazor.activateMazor(position);
 	}
 
 	// this state can only be reached if the mazor is just activated.
@@ -594,6 +603,7 @@ function Mazor(){
 	Mazor.prototype.deActivatePan = function(){
 		this.panIcon.showNormal();
 		this.showBlue();
+		this.panLine.hideAll();
 		
 	}
 	
@@ -619,9 +629,10 @@ function Mazor(){
 		this.outerCircle.hide();
 		this.close.hide();
 		this.panIcon.hideAll();
+		this.panLine.hideAll();
 		this.zoomIcon.hideAll();
 		this.updatePosition(this.origin);
-		mazorManager.checkToActivate();
+		//mazorManager.checkToActivate();
 	}
 	
 	Mazor.prototype.highlightZoom = function(){
