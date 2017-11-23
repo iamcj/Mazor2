@@ -25,7 +25,7 @@ html, body{
 	z-index: 3;
 	position:absolute;
 	visibility:hidden;
-	pointer-events:none; 
+	pointer-events:none; 	
 }
 
 #Wrapper{
@@ -188,17 +188,23 @@ svg.PanIcon {
 	position:absolute;
 	left: 15px;
 	top: 15px;
-	height: 35px;
-	width: 150px;
+	height: 30px;
+	width: 300px;
 	background-color: white;
 	border: 1px solid grey;
 	border-radius: 5px;
 	display: table;
+	padding: 5px;
+	
 }
 #TaskText {
 	display: table-cell;
 	text-align: center;
 	vertical-align: middle;
 	font-family: arial;
+	  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
