@@ -1022,10 +1022,10 @@ function Point(px,py){
 	}
 	
 function TaskButton(taskmanager){
-	var taskManager = taskmanager;
+	this.taskManager = taskmanager;
 	
-	var div = document.getElementById('Task');
-	var textDiv = document.getElementById('TaskText');
+	this.div = document.getElementById('Task');
+	this.textDiv = document.getElementById('TaskText');
 }
 	
 	TaskButton.prototype.showText = function(text){
@@ -1043,20 +1043,37 @@ function TaskButton(taskmanager){
 	
 //Data Class
 function TaskManager(){
-	this.clickCount;
+	this.taskCount;
 	this.userId = new Date().getUTCMilliseconds();
-	this.tasksDescriptions = new Map();
-	this.tasks = [];
-	this.activeTask;
+	//this.tasksDescriptions = new Map();
+	this.tasks = new Map();
+	this.activeTask = new Practice();
+	this.activeTask.start();
 	this.taskButton = new TaskButton(this);
 
 	//Task definition
-	this.tasksDescriptions.set(1,"Taak1");
-	this.tasksDescriptions.set(2,"Taak2");
+	//this.tasksDescriptions.set(1,"Taak1");
+	//this.tasksDescriptions.set(2,"Taak2");
 }
 
-	TaskManager.prototype.newTask = function(taskId){
-	    var task = new Task(userID,taskId,taskName);
+	TaskManager.prototype.newTask = function(){
+		this.taskCount = this.taskCount + 1;
+		var taskId = this.taskCount;
+		switch(this.taskCount){
+			case 1: 
+				var task = new Task1(userID,taskId,taskName);
+				break;
+			case 2: 
+				var task = new Task2(userID,taskId,taskName);
+				break;
+			case 3: 
+				var task = new Task3(userID,taskId,taskName);
+				break;
+			case 4: 
+				var task = new Task4(userID,taskId,taskName);
+				break;
+		}
+	    
 		this.tasks.set(taskId,task);
 		return task;
 	}
@@ -1083,17 +1100,16 @@ function TaskManager(){
 		return statusLog;
 	}
 	
-	TaskManager.prototype.isButtonClicked = function(){
-		return this.disableMazor;
-	}
-	
 	TaskManager.prototype.taskButtonClicked = function(){
-/* 		if (this.activeTask.done()){
+ 		if (this.activeTask.done()){
 			this.activeTask = this.newTask();
+			this.activeTask.start();
+			this.taskButton.showText(this.activeTask.startText);
+		} else if (this.activeTask.started) {
+			this.taskButton.showText(this.activeTask.stopText);
 		} else {
-			this.activateTask.click();
-		} */
-		console.log('click');
+			this.activateTask.stop();
+		}
 	}
 	
 	
@@ -1106,12 +1122,15 @@ function Task(taskUserId, taskId, taskName){
 	this.movement;
 	this.totalTime;
 	this.statusLog;
-	this.done;
-	
+	this.isDone;
+	this.startText;
+	this.stopText;
+	this.started = false;
 
 }
 
 	Task.prototype.start = function(){
+		this.started = true;
 	    this.startTime = Date.now();
 	}
 	
@@ -1137,27 +1156,55 @@ function Task(taskUserId, taskId, taskName){
 	}
 	
 	Task.prototype.done = function(movement){
-	    return this.done;
+	    return this.isDone;
 	}
 	
 	
-Task1.prototype = new Task();
-function Task1(){
-	
+Practice.prototype = new Task();
+function Practice(taskUserId, taskId, taskName){
+	this.userId = taskUserId;
+	this.number = taskId;
+	this.name = taskName;
+	this.startText = "Zoek bijvoorbeeld het vliegveld in Jakarta \r\n of een moskee op Bali";
+	this.stopText = "Stop met Oefenen";
 }	
 
+Task1.prototype = new Task();
+function Task1(taskUserId, taskId, taskName){
+	this.userId = taskUserId;
+	this.number = taskId;
+	this.name = taskName;
+	this.startText = "Start taak 1: zoek je eigen huis";
+	this.stopText = "Stop taak 1: zoek je eigen huis";
+}
+
 Task2.prototype = new Task();
-function Task1(){
+function Task2(taskUserId, taskId, taskName){
+	this.userId = taskUserId;
+	this.number = taskId;
+	this.name = taskName;
+	this.startText = "Start taak 2: zoek Amsterdam Centraal";
+	this.stopText = "Stop taak 2: zoek Amsterdam Centraal";
 	
 }
 
 Task3.prototype = new Task();
-function Task1(){
+function Task3(taskUserId, taskId, taskName){
+	this.userId = taskUserId;
+	this.number = taskId;
+	this.name = taskName;
+	this.startText = "Start taak 3: vind een ziekenhuis in Leeuwarden";
+	this.stopText = "Stop taak 3: vind een ziekenhuis in Leeuwarden";
 	
 }
 
 Task4.prototype = new Task();
-function Task1(){
+function Task4(taskUserId, taskId, taskName){
+	this.userId = taskUserId;
+	this.number = taskId;
+	this.name = taskName;
+	this.startText = "Start taak 4: vind een plek om even te rusten \r\n en iets te eten onderweg";
+	this.stopText = "Stop taak 4: vind een plek om even te rusten \r\n en iets te eten onderweg";
 	
 }
 	
