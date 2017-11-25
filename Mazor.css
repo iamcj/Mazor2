@@ -19,6 +19,7 @@ html, body{
   --PanColor: var(--blue-color);
   --PanFillColor: var(--white-color);
   --MazorColor: var(--blue-color);
+  --TextButtonColor: var(--green-color);
 }
 
 .default {
@@ -189,17 +190,18 @@ svg.PanIcon {
 	left: 15px;
 	top: 15px;
 	height: 30px;
-	width: 300px;
+	width: 325px;
 	background-color: white;
 	border: 1px solid grey;
 	border-radius: 5px;
 	display: table;
-	padding: 5px;
+	padding: 10px;
 	
 }
 #TaskText {
 	display: table-cell;
 	text-align: center;
+	color: var(--TextButtonColor);
 	vertical-align: middle;
 	font-family: arial;
 	  -webkit-user-select: none;

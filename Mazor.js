@@ -12,6 +12,7 @@ var previousPosition;
 var mouseDifLat;
 var mouseDifLng;
 var zoomAngle;
+var start=false;
 
 //settings
 var timeOutms = 400;
@@ -22,7 +23,7 @@ var panIconOffset = 57;
 var zoomIconOffset = 36;
 var fullPanModeRadius = 70;
 var zoomFactor = 100;
-var zoomLevel = 8;
+var zoomLevel = 6;
 var zoomChange = 2;
 var maxPanDistance = 170;
 var panInterval = 10;
@@ -71,13 +72,16 @@ function Mouse(){
 			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
 			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
 			mazorManager.updatePosition(position);
+			mazorManager.addMovement(position.calcDistance(previousPosition));
 			previousPosition = position;
+			
 		}
 	}
 
 		// For the rest of the moving
 	function onMouseClick(e) {
-		if (!inButtonArea(e.pageX,e.pageY)){
+		mazorManager.addClick();
+		if (!inButtonArea(e.pageX,e.pageY) && start){
 			var position = new Point(e.pageX,e.pageY);
 			mazorManager.checkToActivate(position);
 			document.removeEventListener('click', onMouseClick, false);
@@ -85,7 +89,7 @@ function Mouse(){
 	}
 	
 	function inButtonArea(x,y){
-		if (x <330 && y < 57) {
+		if (x <360 && y < 70) {
 			return true;
 		}
 	}
@@ -106,7 +110,7 @@ function Canvas(){
 
 	//set Height of Canvas
 	Canvas.prototype.loadMaps = function(){
-		var latLng = new google.maps.LatLng(52.28958, 5.39524);
+		var latLng = new google.maps.LatLng(-5.046043, 118.245270);
 
 		this.map = new google.maps.Map(document.getElementById('Canvas'), {
 		zoom: zoomLevel,
@@ -192,6 +196,11 @@ function Canvas(){
 	Canvas.prototype.getCenter = function(){
 		return this.map.getCenter();
 	}
+	
+	Canvas.prototype.setCenter = function(newCenter){
+		this.map.setCenter = newCenter;
+	}
+
 
 	Canvas.prototype.latLng2Point = function(latLng){
 		var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
@@ -317,13 +326,14 @@ function MazorManager(){
 		}
 		this.mazor.updatePosition(position);
 		
+		
 	}
 
 	MazorManager.prototype.checkToActivate = function(position){
-		clearTimeout(timer);
-		var t = this;
-		timer = window.setTimeout(function(){t.mazor.activateMazor();},timeOutms);
-	// 	this.mazor.activateMazor(position);
+	//	clearTimeout(timer);
+	//	var t = this;
+	//	timer = window.setTimeout(function(){t.mazor.activateMazor();},timeOutms);
+	 	this.mazor.activateMazor(position);
 	}
 
 	// this state can only be reached if the mazor is just activated.
@@ -523,6 +533,19 @@ function MazorManager(){
 		return this.mazor.originLatLng;
 	}
 	
+	MazorManager.prototype.addClick = function(){
+		if (this.taskManager) {
+			this.taskManager.addClick();
+		}
+	}
+	
+	MazorManager.prototype.addMovement = function(distance){
+		if (this.taskManager) {
+			this.taskManager.addMovement(distance);
+		}
+	}
+	
+	
 
 //Start of Mazor
 function Mazor(){
@@ -558,13 +581,13 @@ function Mazor(){
 	}
 
 	Mazor.prototype.init = function(){
-		this.state = states.DEACTIVATED;
+		this.setState(states.DEACTIVATED);
 		this.MazorDeActivated.show();
 	}
 	
 	Mazor.prototype.activateMazor = function(){
 		this.originLatLng = mouseLatLng;
-		this.state = states.ACTIVATED;
+		this.setState(states.ACTIVATED);
 		this.MazorDeActivated.hide();
 		this.cursorBall.showNormal();
 		this.cursorBall.setPosition(this.origin);
@@ -586,12 +609,12 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.activateMazorClosable = function(){
-		this.state = states.ACTIVATEDCLOSABLE;
+		this.setState(states.ACTIVATEDCLOSABLE);
 	}
 	
 	Mazor.prototype.activateZoom = function(position){
 		zoomAngle = null;
-		this.state = states.ZOOMACTIVATED;
+		this.setState(states.ZOOMACTIVATED);
 		this.zoomIcon.highlightZoom();		
 		this.zoomIcon.showTwoWay();
 		this.zoomDegrees = this.origin.calcAngle(position);
@@ -610,7 +633,7 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.activatePan = function(position){
-		this.state = states.PANACTIVATED;
+		this.setState(states.PANACTIVATED);
 		//neede because you van go from zoomActivated to Panactivated without passing ACTIVATEDCLOSABLE
 		this.deActivateZoom(position);
 		//this.panIcon.showActivePanIcon();
@@ -628,7 +651,7 @@ function Mazor(){
 	
 	Mazor.prototype.activateFullPanMode = function(position){
 		this.zoomIcon.hideAll();
-		this.state = states.FULLPANMODEACTIVATED;		
+		this.setState(states.FULLPANMODEACTIVATED);		
 		this.showGreen();
 		this.panLine.showAll();
 	}
@@ -641,7 +664,7 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.deActivateMazor = function(position){
-		this.state = states.DEACTIVATED;
+		this.setState(states.DEACTIVATED);
 		this.MazorDeActivated.show();
 		this.cursorBall.hide();
 		this.innerCircle.hide();
@@ -723,7 +746,12 @@ function Mazor(){
 		return this.origin.calcAngle(position);
 	}	
 
-				
+	Mazor.prototype.setState = function(newState){
+		this.state = newState;
+		if (mazorManager.taskManager){
+			mazorManager.taskManager.addState(this.state);
+		}
+	}			
 	
 	
 function Element(){
@@ -1028,7 +1056,13 @@ function TaskButton(taskmanager){
 	this.textDiv = document.getElementById('TaskText');
 }
 	
-	TaskButton.prototype.showText = function(text){
+	TaskButton.prototype.showStartText = function(text){
+		document.documentElement.style.setProperty('--TextButtonColor', 'var(--green-color)');
+		this.textDiv.innerHTML = text;
+	}
+	
+	TaskButton.prototype.showStopText = function(text){
+		document.documentElement.style.setProperty('--TextButtonColor', 'red');
 		this.textDiv.innerHTML = text;
 	}
 
@@ -1043,12 +1077,11 @@ function TaskButton(taskmanager){
 	
 //Data Class
 function TaskManager(){
-	this.taskCount;
+	this.taskCount =0;
 	this.userId = new Date().getUTCMilliseconds();
 	//this.tasksDescriptions = new Map();
-	this.tasks = new Map();
-	this.activeTask = new Practice();
-	this.activeTask.start();
+	this.tasks = new Set();
+	this.activeTask = new Practice(this.userId,0);	
 	this.taskButton = new TaskButton(this);
 
 	//Task definition
@@ -1061,66 +1094,82 @@ function TaskManager(){
 		var taskId = this.taskCount;
 		switch(this.taskCount){
 			case 1: 
-				var task = new Task1(userID,taskId,taskName);
+				var task = new Task1(this.userId,taskId);
 				break;
 			case 2: 
-				var task = new Task2(userID,taskId,taskName);
+				var task = new Task2(this.userId,taskId);
 				break;
 			case 3: 
-				var task = new Task3(userID,taskId,taskName);
+				var task = new Task3(this.userId,taskId);
 				break;
 			case 4: 
-				var task = new Task4(userID,taskId,taskName);
+				var task = new Task4(this.userId,taskId);
+				break;
+			case 5: 
+				var task = new CloseUp(this.userId,taskId);
 				break;
 		}
 	    
-		this.tasks.set(taskId,task);
+		this.tasks.add(task);
 		return task;
 	}
 
 	TaskManager.prototype.send = function(){
-	   Email.send("corjanLeiden@gmail.com", "corjan@gmail.com",	this.number + this.name, this.getTaskData() + "\r\n" + this.getStatusLog(), "smtp.gmail.com", "CorjanLeiden@gmail.com", "Uffel1Uffel1");   
+	   Email.send("corjanLeiden@gmail.com", "corjan@gmail.com",	this.userId, this.getTaskData() + "\r\n\r\n" + this.getStatusLog(), "smtp.gmail.com", "CorjanLeiden@gmail.com", "Uffel1Uffel1");   
 	}
 	
 	TaskManager.prototype.getTaskData = function(){
 		//assamble data, create csv format.  
-		var data = "UserId;TaskNumber;TaskName;StartTime;TotalTime;Clicks;Movement" + "\r\n"
-		for(var task in this.tasks){
-			data = data + task.userId + ";" +task.number+ ";" +task.name+ ";" +task.startTime+ ";" +task.totalTime+ ";" +task.clicks+ ";" +task.movement + "\r\n";
+		var data = "UserId;TaskNumber;StartTime;TotalTime;Clicks;Movement" + "\r\n\r\n"
+
+		
+		for(let task of this.tasks){
+			data = data + task.userId + ";" +task.number+ ";" +task.startTime+ ";" +task.totalTime+ ";" +task.clicks+ ";" +task.movement + "\r\n\r\n";
 		}			
 		return data;
 	}
 	
 	TaskManager.prototype.getStatusLog = function(){
 	   //assamble data, create csv format.  
-	   	var statusLog = "UserId;TaskNumber;TaskName;Time;Status" + "\r\n"
-		for(var task in this.tasks){
-			statusLog = statusLog + task.userId + ";" +task.number+ ";" +task.name+ ";"  +task.statusLog+ "\r\n";
+	   	var statusLog = "UserId;TaskNumber;Time;Status" + "\r\n\r\n"
+		for(let task of this.tasks){
+			statusLog = statusLog + task.userId + ";" +task.number+ ";"  +task.statusLog+ "\r\n\r\n";
 		}			
 		return statusLog;
 	}
 	
 	TaskManager.prototype.taskButtonClicked = function(){
- 		if (this.activeTask.done()){
-			this.activeTask = this.newTask();
+		//todo
+		start = true;
+ 		 if (!this.activeTask.started) {
+			this.taskButton.showStopText(this.activeTask.stopText);
 			this.activeTask.start();
-			this.taskButton.showText(this.activeTask.startText);
-		} else if (this.activeTask.started) {
-			this.taskButton.showText(this.activeTask.stopText);
-		} else {
-			this.activateTask.stop();
+		} else if (this.activeTask.started){
+			this.activeTask.stop();
+			this.activeTask = this.newTask();
+			this.taskButton.showStartText(this.activeTask.startText);
 		}
 	}
 	
+	TaskManager.prototype.addState = function(state){
+		this.activeTask.addState(state);
+	}
 	
-function Task(taskUserId, taskId, taskName){
+	TaskManager.prototype.addClick = function(){
+		this.activeTask.addClick();
+	}
+	
+	TaskManager.prototype.addMovement = function(distance){
+		this.activeTask.addMovement(distance);
+	}
+	
+function Task(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.startTime;
-	this.name = taskName;
-	this.clicks;
-	this.movement;
-	this.totalTime;
+	this.startTime=0;
+	this.clicks=0;
+	this.movement=0;
+	this.totalTime=0;
 	this.statusLog;
 	this.isDone;
 	this.startText;
@@ -1132,15 +1181,18 @@ function Task(taskUserId, taskId, taskName){
 	Task.prototype.start = function(){
 		this.started = true;
 	    this.startTime = Date.now();
+		//todo
+		mazorManager.canvas.map.panTo(this.location);
+		mazorManager.canvas.zoom(this.zoomFactor);
 	}
 	
 	Task.prototype.stop = function(){
-		this.done = true;
-	    this.totalTime = Date.now() - startTime;
+		this.isDone = true;
+		this.totalTime = Date.now() - this.startTime;
 	}
 	
-	Task.prototype.addStatus = function(status){
-	    this.statusLog = this.statusLog + (Date.now()) + ";" + status + "\r\n";
+	Task.prototype.addState = function(state){
+	    this.statusLog = this.statusLog + (Date.now()) + ";" + state + "\r\n\r\n";
 	}
 	
 	Task.prototype.addClick = function(){
@@ -1148,66 +1200,75 @@ function Task(taskUserId, taskId, taskName){
 	}
 
 	Task.prototype.addMovement = function(movement){
-	    this.clicks = this.movement + movement;
+	    this.movement = this.movement + Math.abs(movement);
 	}
 	
-	Task.prototype.addMovement = function(movement){
-	    this.clicks = this.movement + movement;
-	}
-	
-	Task.prototype.done = function(movement){
+	Task.prototype.done = function(){
 	    return this.isDone;
 	}
 	
 	
 Practice.prototype = new Task();
-function Practice(taskUserId, taskId, taskName){
+function Practice(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.name = taskName;
-	this.startText = "Zoek bijvoorbeeld het vliegveld in Jakarta \r\n of een moskee op Bali";
-	this.stopText = "Stop met Oefenen";
-}	
-
+	this.startText = "Klik hier om te starten met oefenen";
+	this.stopText = "Zoek bv vliegveld bij Jakarta, moskee op Bali<BR> Klik hier als je klaar bent met oefenen";
+}
 Task1.prototype = new Task();
-function Task1(taskUserId, taskId, taskName){
+function Task1(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.name = taskName;
-	this.startText = "Start taak 1: zoek je eigen huis";
-	this.stopText = "Stop taak 1: zoek je eigen huis";
+	this.startText = "Klik hier om te starten met taak 1: <BR> zoek je eigen huis";
+	this.stopText = "Ik ben klaar met taak 1: <BR> zoek je eigen huis";
+	this.location = new google.maps.LatLng(52.28958, 5.39524);
+	this.zoomFactor = 8;
 }
 
 Task2.prototype = new Task();
-function Task2(taskUserId, taskId, taskName){
+function Task2(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.name = taskName;
-	this.startText = "Start taak 2: zoek Amsterdam Centraal";
-	this.stopText = "Stop taak 2: zoek Amsterdam Centraal";
+	this.startText = "Klik hier om te starten met taak 2: <BR> zoek Amsterdam Centraal";
+	this.stopText = "Ik ben klaar met taak 2: <br> zoek Amsterdam Centraal";
+	this.location = new google.maps.LatLng(52.28958, 5.39524);
+	this.zoomFactor = 8;
 	
 }
 
 Task3.prototype = new Task();
-function Task3(taskUserId, taskId, taskName){
+function Task3(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.name = taskName;
-	this.startText = "Start taak 3: vind een ziekenhuis in Leeuwarden";
-	this.stopText = "Stop taak 3: vind een ziekenhuis in Leeuwarden";
+	this.startText = "Klik hier om te starten met taak 3: <BR> zoek een ziekenhuis in Leeuwarden";
+	this.stopText = "Ik ben klaar met taak 3: <br>zoek een ziekenhuis in Leeuwarden";
+	this.location = new google.maps.LatLng(53.196635, 5.792486);
+	this.zoomFactor = 18;
 	
 }
 
 Task4.prototype = new Task();
-function Task4(taskUserId, taskId, taskName){
+function Task4(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.name = taskName;
-	this.startText = "Start taak 4: vind een plek om even te rusten \r\n en iets te eten onderweg";
-	this.stopText = "Stop taak 4: vind een plek om even te rusten \r\n en iets te eten onderweg";
+	this.startText = "Klik hier om te starten met taak 4: <BR> zoek een plek om eten te kopen langs de A31";
+	this.stopText = "Ik ben klaar met taak 4: <br>zoek een plek om eten te kopen langs de A31";
+	this.location = new google.maps.LatLng(53.368559, 7.305221);
+	this.zoomFactor = 16;
+	
+
 	
 }
 	
+CloseUp.prototype = new Task();
+function CloseUp(taskUserId, taskId){
+	this.userId = taskUserId;
+	this.number = taskId;
+	this.startText = "Bedankt voor je medewerking!";
+	this.stopText = "Bedankt voor je medewerking!";
+	mazorManager.taskManager.send();
+	
+}	
 	
 	
 
