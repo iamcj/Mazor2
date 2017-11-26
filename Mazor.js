@@ -1078,7 +1078,7 @@ function TaskButton(taskmanager){
 //Data Class
 function TaskManager(){
 	this.taskCount =0;
-	this.userId = new Date().getUTCMilliseconds();
+	this.userId = Date.now();
 	//this.tasksDescriptions = new Map();
 	this.tasks = new Set();
 	this.activeTask = new Practice(this.userId,0);	
@@ -1115,25 +1115,25 @@ function TaskManager(){
 	}
 
 	TaskManager.prototype.send = function(){
-	   Email.send("corjanLeiden@gmail.com", "corjan@gmail.com",	this.userId, this.getTaskData() + "\r\n\r\n" + this.getStatusLog(), "smtp.gmail.com", "CorjanLeiden@gmail.com", "Uffel1Uffel1");   
+	   Email.send("corjanLeiden@gmail.com", "corjan@gmail.com",	this.userId, this.getTaskData() + "<br><br>" + this.getStatusLog(), "smtp.gmail.com", "CorjanLeiden@gmail.com", "Uffel1Uffel1");   
 	}
 	
 	TaskManager.prototype.getTaskData = function(){
 		//assamble data, create csv format.  
-		var data = "UserId;TaskNumber;StartTime;TotalTime;Clicks;Movement" + "\r\n\r\n"
+		var data = "UserId;TaskNumber;StartTime;TotalTime;Clicks;Movement" + "<br>"
 
 		
 		for(let task of this.tasks){
-			data = data + task.userId + ";" +task.number+ ";" +task.startTime+ ";" +task.totalTime+ ";" +task.clicks+ ";" +task.movement + "\r\n\r\n";
+			data = data + task.userId + ";" +task.number+ ";" +task.startTime+ ";" +task.totalTime+ ";" +task.clicks+ ";" +task.movement + "<br>";
 		}			
 		return data;
 	}
 	
 	TaskManager.prototype.getStatusLog = function(){
 	   //assamble data, create csv format.  
-	   	var statusLog = "UserId;TaskNumber;Time;Status" + "\r\n\r\n"
+	   	var statusLog = "UserId;TaskNumber;Time;Status" + "<br>"
 		for(let task of this.tasks){
-			statusLog = statusLog + task.userId + ";" +task.number+ ";"  +task.statusLog+ "\r\n\r\n";
+			statusLog = statusLog +task.statusLog+ "<br>";
 		}			
 		return statusLog;
 	}
@@ -1170,7 +1170,7 @@ function Task(taskUserId, taskId){
 	this.clicks=0;
 	this.movement=0;
 	this.totalTime=0;
-	this.statusLog;
+	this.statusLog="";
 	this.isDone;
 	this.startText;
 	this.stopText;
@@ -1192,7 +1192,7 @@ function Task(taskUserId, taskId){
 	}
 	
 	Task.prototype.addState = function(state){
-	    this.statusLog = this.statusLog + (Date.now()) + ";" + state + "\r\n\r\n";
+	    this.statusLog = this.statusLog + this.userId + ";" + this.number+ ";" +  Date.now() + ";" + state + "<br>";
 	}
 	
 	Task.prototype.addClick = function(){
