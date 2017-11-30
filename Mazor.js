@@ -15,6 +15,8 @@ var mouseDifLng;
 var zoomAngle;
 var start=true;
 var buttons= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met een gewone muis was het sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
+var buttonsMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met een Mazor was het sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
+
 
 //settings
 var timeOutms = 400;
@@ -81,7 +83,8 @@ function Mouse(){
 			}
 			mazorManager.addMovement(position.calcDistance(previousPosition));
 			previousPosition = position;
-			
+		} else {
+			mazorManager.deActivateMazor(position);
 		}
 	}
 
@@ -548,8 +551,8 @@ function MazorManager(){
 			closeTimer = window.setTimeout(function(){t.mazor.deActivateMazor(position);},iconTimeOutms);
 			return true;
 		} else if(this.mazor.origin.calcDistance(position)> closeRadius){
-			this.mazor.deActivateMazor(position);
-			return true;
+			//this.mazor.deActivateMazor(position);
+			//return true;
 		} else {
 			return false;
 		}
@@ -627,6 +630,13 @@ function MazorManager(){
 		this.mazor.hideAll();
 		this.canvas.normalMode();
 	}
+	
+	MazorManager.prototype.deActivateMazor = function(position){
+		this.mazor.deActivateMazor(position);
+		clearInterval(panModeTimer);
+	}
+	
+	
 				
 //Start of Mazor
 function Mazor(){
@@ -1093,7 +1103,7 @@ PanLine.prototype.drawLine = function (origin, position) {
   this.panLineDiv.div.style.setProperty('width', distance - 10 + 'px');
 
   // Set Position
-  this.div.style.setProperty('top', origin.y + ydif +'px');
+  this.div.style.setProperty('top', origin.y -10 + ydif +'px');
   this.div.style.setProperty('left', origin.x - xdif +'px');
 }
 
@@ -1155,6 +1165,17 @@ function TaskButton(taskmanager){
 		document.documentElement.style.setProperty('--TextButtonColor', 'red');
 		this.textDiv.innerHTML = text;
 	}
+	
+	TaskButton.prototype.show = function(){
+		$("#Task").fadeIn();
+		this.div.style.setProperty('visibility','visible');
+	}
+	
+	TaskButton.prototype.hide = function(){
+		//$("#Task").fadeOut();
+		this.div.style.setProperty('visibility','hidden');
+	}
+
 
 	//some ugly code
 //	function onTaskClick(){
@@ -1246,6 +1267,10 @@ function TaskManager(){
 			this.activeTask = this.newTask();
 			this.activeTask.start();
 			this.taskButton.showStopText(this.activeTask.stopText);
+			this.taskButton.hide();
+			var t = this;
+			window.setTimeout(function(){t.taskButton.show();},400);
+			
 		//}
 	}
 	
@@ -1404,7 +1429,7 @@ function Task2(taskUserId, taskId){
 	this.startText = "Klik hier om te starten met taak 2: <BR> zoek een ziekenhuis in Leeuwarden";
 	this.stopText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + buttons;
 	this.location = new google.maps.LatLng(53.196635, 5.792486);
-	this.zoomFactor = 18;
+	this.zoomFactor = 19;
 	
 }
 
@@ -1437,7 +1462,7 @@ function Task5(taskUserId, taskId){
 	this.startText = "Klik hier om te starten met taak 5: <BR> zoek een ziekenhuis in Leeuwarden";
 	this.stopText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + buttons;
 	this.location = new google.maps.LatLng(50.849093, 5.695795);
-	this.zoomFactor = 18;
+	this.zoomFactor = 19;
 	
 }
 
