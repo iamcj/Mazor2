@@ -19,7 +19,7 @@ html, body{
   --PanColor: var(--blue-color);
   --PanFillColor: var(--white-color);
   --MazorColor: var(--blue-color);
-  --TextButtonColor: var(--green-color);
+  --TextButtonColor: red;
 }
 
 .default {
@@ -189,9 +189,9 @@ svg.PanIcon {
 	position:absolute;
 	left: 15px;
 	top: 15px;
-	height: 30px;
-	width: 325px;
-	background-color: white;
+	height: 185px;
+	width: 385px;
+	background-color: var(--TextButtonColor);
 	border: 1px solid grey;
 	border-radius: 5px;
 	display: table;
@@ -201,12 +201,32 @@ svg.PanIcon {
 #TaskText {
 	display: table-cell;
 	text-align: center;
-	color: var(--TextButtonColor);
+	color: white;
 	vertical-align: middle;
+	line-height: 175%;
 	font-family: arial;
 	  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.Button {
+		border: 2px solid white;
+			color: red;
+			background-color: white;
+	border-radius: 5px;
+	padding:3px;
+	width: 370px;
+	
+}
+
+.Button:hover { 
+    font-weight: bold;
+}
+
+.Spacer {
+	height: 10px;
+	
 }
 
