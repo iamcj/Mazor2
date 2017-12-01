@@ -15,7 +15,7 @@ var mouseDifLng;
 var zoomAngle;
 var start=true;
 var buttons= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met een gewone muis was het sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
-var buttonsMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor was het sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
+var buttonsMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor was het denk ik sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
 
 //settings
 var timeOutms = 400;
@@ -160,6 +160,11 @@ function Canvas(){
 	Canvas.prototype.normalMode = function(){
 		this.map.setOptions({  zoomControl: true  });
 		this.map.setOptions({  gestureHandling: 'auto'  });
+	}
+	
+	Canvas.prototype.mazorMode = function(){
+		this.map.setOptions({  zoomControl: false  });
+		this.map.setOptions({  gestureHandling: 'none'  });
 	}
 	
 	Canvas.prototype.getGestureHandling = function(){
@@ -630,6 +635,13 @@ function MazorManager(){
 		start = false; 
 		this.mazor.hideAll(this.mazor.origin);
 		this.canvas.normalMode();
+	}
+	
+	MazorManager.prototype.changeToMazor = function(){
+		disable = false;
+		start = true; 
+		this.canvas.mazorMode();
+		this.mazor.MazorDeActivated.show();
 	}
 	
 	MazorManager.prototype.deActivateMazor = function(position){
@@ -1209,6 +1221,7 @@ function TaskManager(){
 		var taskId = this.taskCount;
 		switch(this.taskCount){
 			case 1: 
+				mazorManager.change();
 				var task = new Task1(this.userId,taskId);
 				break;
 			case 2: 
@@ -1219,7 +1232,7 @@ function TaskManager(){
 				break;
 			case 4: 
 				var task = new Task4(this.userId,taskId);
-				mazorManager.change();
+				mazorManager.changeToMazor();
 				break;	
 			case 5: 
 				var task = new Task5(this.userId,taskId);
@@ -1420,8 +1433,8 @@ Task1.prototype = new Task();
 function Task1(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.startText = "Klik hier om te starten met taak 1: <BR> zoek Amsterdam Centraal";
-	this.stopText = "Taak 1: zoek Amsterdam Centraal<br>" + buttons;
+	this.startText = "Nu eerst met MUIS en ZOOMEN rechtsonder<BR>Klik hier om te starten met taak 1: <BR> zoek Amsterdam Centraal";
+	this.stopText = "Nu eerst met MUIS en ZOOMEN rechtsonder<BR>Taak 1: zoek Amsterdam Centraal<br>" + buttonsMazor;
 	this.location = new google.maps.LatLng(52.28958, 5.39524);
 	this.zoomFactor = 8;
 	
@@ -1432,7 +1445,7 @@ function Task2(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
 	this.startText = "Klik hier om te starten met taak 2: <BR> zoek een ziekenhuis in Leeuwarden";
-	this.stopText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + buttons;
+	this.stopText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + buttonsMazor;
 	this.location = new google.maps.LatLng(53.196635, 5.792486);
 	this.zoomFactor = 19;
 	
@@ -1443,7 +1456,7 @@ function Task3(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
 	this.startText = "Klik hier om te starten met taak 3: <BR> zoek een plek om eten te kopen langs de A31";
-	this.stopText = "Taak 3: zoek een plek om eten te kopen langs de A31<br>" + buttons;
+	this.stopText = "Taak 3: zoek een plek om eten te kopen langs de A31<br>" + buttonsMazor;
 	this.location = new google.maps.LatLng(53.368559, 7.305221);
 	this.zoomFactor = 16;
 	
@@ -1454,7 +1467,7 @@ function Task4(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
 	this.startText = "Klik hier om te starten met taak 4: <BR> zoek Amsterdam Centraal";
-	this.stopText = "Nu gewoon met MUIS en ZOOMEN rechtsonder <BR> Taak 4: zoek Rotterdam Centraal<br>" + buttonsMazor;
+	this.stopText = "Nu met de MAZOR! <BR> Taak 4: zoek Rotterdam Centraal<br>" + buttons;
 	this.location = new google.maps.LatLng(52.28958, 5.39524);
 	this.zoomFactor = 8;
 	
@@ -1465,7 +1478,7 @@ function Task5(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
 	this.startText = "Klik hier om te starten met taak 5: <BR> zoek een ziekenhuis in Leeuwarden";
-	this.stopText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + buttonsMazor;
+	this.stopText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + buttons;
 	this.location = new google.maps.LatLng(50.849093, 5.695795);
 	this.zoomFactor = 19;
 	
@@ -1476,7 +1489,7 @@ function Task6(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
 	this.startText = "Klik hier om te starten met taak 3: <BR> zoek een plek om eten te kopen langs de A44";
-	this.stopText = "Taak 6: zoek een plek om eten te kopen langs de A44<br>" + buttonsMazor;
+	this.stopText = "Taak 6: zoek een plek om eten te kopen langs de A44<br>" + buttons;
 	this.location = new google.maps.LatLng(51.589606, 8.676892);
 	this.zoomFactor = 16;
 	
