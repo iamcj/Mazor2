@@ -635,6 +635,7 @@ function MazorManager(){
 		start = false; 
 		this.mazor.hideAll(this.mazor.origin);
 		this.canvas.normalMode();
+		document.addEventListener('click', onMouseClickDisabled, false);
 	}
 	
 	MazorManager.prototype.changeToMazor = function(){
@@ -643,6 +644,7 @@ function MazorManager(){
 		this.canvas.mazorMode();
 		this.mazor.MazorDeActivated.show();
 		this.mazor.updatePosition(previousPosition);
+		document.removeEventListener('click', onMouseClickDisabled, false);
 	}
 	
 	MazorManager.prototype.deActivateMazor = function(position){
