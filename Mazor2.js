@@ -642,6 +642,7 @@ function MazorManager(){
 		start = true; 
 		this.canvas.mazorMode();
 		this.mazor.MazorDeActivated.show();
+		this.mazor.updatePosition(previousPosition);
 	}
 	
 	MazorManager.prototype.deActivateMazor = function(position){
