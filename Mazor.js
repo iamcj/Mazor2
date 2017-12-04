@@ -55,6 +55,7 @@ function Mouse(){
 		}	
 	}
 	
+	
 	Mouse.prototype.clickToActivate = function(){
 		document.addEventListener('click', onMouseClick, false);
 		document.addEventListener('wheel', onWheel, false);
