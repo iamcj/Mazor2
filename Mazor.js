@@ -89,7 +89,7 @@ function Mouse(){
 		}
 	}
 
-		// For the rest of the moving
+		// For the rest of the movingg
 	function onMouseClick(e) {
 		mazorManager.addClick();
 		if (!inButtonArea(e.pageX,e.pageY) && start){
