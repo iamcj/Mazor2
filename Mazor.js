@@ -55,6 +55,7 @@ function Mouse(){
 		}	
 	}
 	
+	
 	Mouse.prototype.clickToActivate = function(){
 		document.addEventListener('click', onMouseClick, false);
 		document.addEventListener('wheel', onWheel, false);
@@ -630,6 +631,7 @@ function MazorManager(){
 		start = false; 
 		this.mazor.hideAll(this.mazor.origin);
 		this.canvas.normalMode();
+		document.addEventListener('click', onMouseClick, false);
 	}
 	
 	MazorManager.prototype.deActivateMazor = function(position){
