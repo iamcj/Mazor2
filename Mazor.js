@@ -99,7 +99,7 @@ function Mouse(){
 			var oldLat = mazorManager.point2LatLng(position);
 			mouseDifLat = oldLat.lat() - mazorManager.point2LatLng(previousPosition).lat();
 			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
-			console.log(mouseDifLat);
+			
 			if (!disable){
 				mazorManager.updatePosition(position);
 			}
@@ -115,7 +115,7 @@ function Mouse(){
 		// For the rest of the movingg
 	function onMouseClick(e) {
 		mazorManager.addClick();
-		console.log(1);
+	
 /* 		if (!inButtonArea(e.pageX,e.pageY) && start){
 			var position = new Point(e.pageX,e.pageY);
 			mazorManager.checkToActivate(position);
@@ -124,7 +124,7 @@ function Mouse(){
 	}
 	
 	function onMouseClickDisabled(e) {
-		console.log(2);
+		
 		mazorManager.addClick();
 	}
 	
@@ -317,7 +317,7 @@ function MazorManager(){
 	MazorManager.prototype.updatePosition = function(position){
 		
 		//console.log(string_of_enum(states,this.mazor.state));
-		console.log(getState(this.mazor.state));
+		//console.log(getState(this.mazor.state));
 		if(this.mazor.isDeActivated()){
 			this.mouse.clickToActivate();
 			//this.checkToActivate(position);
@@ -511,7 +511,7 @@ function MazorManager(){
 
 		if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) > cursorBallRadius *2){
 	//		console.log(position.calcDistance(this.mazor.zoomIconMin.origin));
-			console.log('StopPlus');
+			//console.log('StopPlus');
 			clearInterval(zoomModeTimer);
 			this.mazor.activateZoom(position);
 			this.mazor.zoomIconPlus.notHighlightZoomIcon();
@@ -522,7 +522,7 @@ function MazorManager(){
 
 		if (position.calcDistance(this.mazor.zoomIconMin.realPosition) > cursorBallRadius *2){
 //			console.log(position.calcDistance(this.mazor.zoomIconPlus.origin));
-			console.log('StopMin');
+			//console.log('StopMin');
 			clearInterval(zoomModeTimer);
 			this.mazor.activateZoom(position);
 			this.mazor.zoomIconMin.notHighlightZoomIcon();
@@ -577,7 +577,7 @@ function MazorManager(){
 		if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) < cursorBallRadius *2.5){
 			//console.log(position.calcDistance(this.mazor.zoomIconPlus.realPosition));
 			this.canvas.zoomIn();
-			console.log(this.canvas.getZoom());
+			//console.log(this.canvas.getZoom());
 		} else if (position.calcDistance(this.mazor.zoomIconMin.realPosition) < cursorBallRadius *2.5){
 			//console.log(position.calcDistance(this.mazor.zoomIconMin.realPosition));
 			this.canvas.zoomOut();
