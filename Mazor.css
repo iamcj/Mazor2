@@ -196,6 +196,7 @@ svg.PanIcon {
 	border-radius: 5px;
 	display: table;
 	padding: 10px;
+	visibility:hidden;
 	
 }
 #TaskText {
@@ -218,7 +219,7 @@ svg.PanIcon {
 	border-radius: 5px;
 	color: white;
 	font-weight: bold;
-	height: 20px;
+	height: 40px;
 	width:350px;
 	padding:5px;
 	font-family: arial;
