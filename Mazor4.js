@@ -19,6 +19,8 @@ var buttons= "<div class='spacer'></div><div class='Button' onclick='mazorManage
 var buttonsMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
 var buttonEasyMouse= "<div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMazor()'>Met een gewone muis was het sneller gegaan</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor is het sneller gegaan</div>"
 var buttonEasyMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor was het sneller gegaan</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMazor()'>Met de Muis is het sneller gegaan</div>"
+var marker;
+var newZoomCenter;
 
 //settings
 var timeOutms = 400;
@@ -28,12 +30,12 @@ var closeRadius = 70;
 var panIconOffset = 57;
 var zoomIconOffset = 36;
 var fullPanModeRadius = 70;
-var zoomFactor = 100;
-var zoomLevel = 6;
+var zoomFactor = 10;
+var zoomLevel = 5;
 var zoomChange = 2;
 var maxPanDistance = 170;
 var panInterval = 10;
-var zoomModeInterval = 750;
+var zoomModeInterval = 300;
 var panStep = 0.001;
 var i=0;
 var oldDirection = 400;
@@ -97,9 +99,8 @@ function Mouse(){
 		if (!inButtonArea(e.pageX,e.pageY)) {
 			var position= new Point(e.pageX, e.pageY);
 			var oldLat = mazorManager.point2LatLng(position);
-			mouseDifLat = oldLat.lat() - mazorManager.point2LatLng(previousPosition).lat();
-			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
-			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
+			mouseDifLat = oldLat.lat - mazorManager.point2LatLng(previousPosition).lat;
+			mouseDifLng = mazorManager.point2LatLng(position).lng - mazorManager.point2LatLng(previousPosition).lng;
 			if (!disable){
 				mazorManager.updatePosition(position);
 			}
@@ -123,6 +124,10 @@ function Mouse(){
 		} */
 	}
 	
+	function setIdle(event){
+		 mazorManager.setIdle(true);
+	 }
+	
 	function onMouseClickDisabled(e) {
 		console.log(2);
 		mazorManager.addClick();
@@ -143,6 +148,7 @@ function Canvas(){
 	this.map;
 	this.setHeight();
 	this.loadMaps();
+	this.idle =true;
 
 }
 
@@ -154,7 +160,7 @@ function Canvas(){
 
 	//set Height of Canvas
 	Canvas.prototype.loadMaps = function(){
-		var latLng = new google.maps.LatLng(-5.046043, 118.245270);
+/* 		var latLng = new google.maps.LatLng(-5.046043, 118.245270);
 
 		this.map = new google.maps.Map(document.getElementById('Canvas'), {
 		scrollwheel: false,
@@ -164,23 +170,53 @@ function Canvas(){
 		gestureHandling: this.getGestureHandling(),
 		zoomControl: disable
 		});
+		 */
+		 
+		 var latLng = new mapboxgl.LngLat(118.245270,-5.046043 );
 		
+		mapboxgl.accessToken = 'pk.eyJ1IjoiaWFtY2oiLCJhIjoiY2phd3Z0ajFtMG9mYTMwcGk2MjE4OGc1YyJ9.WmhfzYT1kijQRhyNfPZSVA';
+		this.map = new mapboxgl.Map({
+		container: 'Canvas',
+		zoom: zoomLevel,
+		center: latLng,
+		style: 'mapbox://styles/mapbox/streets-v10'
+		});
+		
+		this.map.scrollZoom.disable();
+		this.map.dragPan.disable();
+		 
+		 this.map.on('mousemove', function (event) {
+              mouseLatLng = event.lngLat;
+			//  mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
+
+          });
+		  
+ 		  this.map.on('moveend', function (event) {
+             setIdle(true);
+          });
+		 
+		 
 		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
-		this.map.addListener('mousemove', function (event) {
+/* 		this.map.addListener('mousemove', function (event) {
               mouseLatLng = event.latLng;
 			//  mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
 
           });
-		  
+		    */
 		  		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
-		this.map.addListener('zoom_changed', function (event) {
-              mazorManager.addZoom(this.getZoom());
-			//  mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
+		// this.map.addListener('zoom_changed', function (event) {
+              // mazorManager.addZoom(this.getZoom());
+			 mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
 
-          });
+          // });
 		  
 		  
 	}
+	
+	Canvas.prototype.addMarker = function(latLng, mazor){
+		marker = new mapboxgl.Marker(mazor).setLngLat(latLng).addTo(this.map); 
+	}
+	
 	
 	Canvas.prototype.normalMode = function(){
 		this.map.setOptions({  zoomControl: true  });
@@ -202,11 +238,14 @@ function Canvas(){
 		//}
 
 		//if (angle < zoomAngle -30){
-			var lat = (mazorManager.getMazorLatLng().lat() - this.map.getCenter().lat())/2;
-			var lng = (mazorManager.getMazorLatLng().lng() - this.map.getCenter().lng())/2;
+/* 			var lat = (mazorManager.getMazorLatlng.lat - this.map.getCenter().lat)/2;
+			var lng = (mazorManager.getMazorLatlng.lng - this.map.getCenter().lng)/2;
 			this.map.setZoom(this.map.getZoom()+1);
-			this.panLatLng( this.map.getCenter().lat() + lat,this.map.getCenter().lng() + lng);
+			this.panLatLng( this.map.getCenter().lat + lat,this.map.getCenter().lng + lng);
 			
+			 */
+			var newZoom = this.map.getZoom()+0.4;
+			this.map.easeTo({zoom: newZoom});
 		//	zoomAngle = angle;
 			
 		//}
@@ -215,17 +254,19 @@ function Canvas(){
 	
 	Canvas.prototype.zoomOut = function(angle){
 	
+		var newZoom = this.map.getZoom()-0.4;
+		this.map.easeTo({zoom: newZoom});
 		//if (!zoomAngle|| zoomAngle >329.9 || angle < zoomAngle){
 		//	zoomAngle = angle-1;
 		//}
 
-	//	if (angle > zoomAngle + 30){
-			var lat = (mazorManager.getMazorLatLng().lat() - this.map.getCenter().lat());
-			var lng = (mazorManager.getMazorLatLng().lng() - this.map.getCenter().lng());
+	/* //	if (angle > zoomAngle + 30){
+			var lat = (mazorManager.getMazorLatlng.lat - this.map.getCenter().lat);
+			var lng = (mazorManager.getMazorLatlng.lng - this.map.getCenter().lng);
 			this.map.setZoom(this.map.getZoom()-1);
-			this.panLatLng( this.map.getCenter().lat() - lat,this.map.getCenter().lng() - lng);
+			this.panLatLng( this.map.getCenter().lat - lat,this.map.getCenter().lng - lng);
 			//zoomAngle =angle;
-		//}
+		//} */
 		
 	}
 	
@@ -237,8 +278,8 @@ function Canvas(){
 	Canvas.prototype.pan = function(direction,speed){
 		
 		// rekening houden met zoomfactor.
-		panStepX = Math.pow(2,-this.map.zoom) * 360 * panStep;
-		panStepY =  Math.pow(2,-this.map.zoom) * 180 * panStep;
+		panStepX = Math.pow(2,-(this.map.getZoom())) * 360 * panStep;
+		panStepY =  Math.pow(2,-(this.map.getZoom())) * 180 * panStep;
 		// hoek omrekenen naar x en y met gonio
 		
 		direction = getRealAngle(direction);
@@ -251,13 +292,14 @@ function Canvas(){
 		panStepY = panStepY * speed;
 		//console.log(panStepX,panStepY);
 		//console.log(speed);
-		this.panLatLng( this.map.getCenter().lat() + panStepY,this.map.getCenter().lng() + panStepX);
+		this.panLatLng( this.map.getCenter().lat + panStepY,this.map.getCenter().lng + panStepX);
 	}
 	
 	Canvas.prototype.panLatLng = function(lat,lng){
-		var newCenter = new google.maps.LatLng(lat, lng);
+		//var newCenter = new google.maps.LatLng(lat, lng);
+		var newCenter = new mapboxgl.LngLat( lng, lat);
 		var bool = false;
-		this.map.panTo(newCenter);
+		this.map.jumpTo({center: newCenter});
 		var bool = true;
 	}
 	
@@ -275,20 +317,27 @@ function Canvas(){
 	
 	
 	Canvas.prototype.latLng2Point = function(latLng){
-		var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
+/* 		var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
 		var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
 		var scale = Math.pow(2, this.map.getZoom());
 		var worldPoint = this.map.getProjection().fromLatLngToPoint(latLng);
-		return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
+		return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale); */
+		return this.map.project(latLng);
 	}
 
 	Canvas.prototype.point2LatLng = function(point){
-		  var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
+/* 		  var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
 		  var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
 		  var scale = Math.pow(2, this.map.getZoom());
 		  var worldPoint = new google.maps.Point(point.x / scale + bottomLeft.x, point.y / scale + topRight.y);
-		  return this.map.getProjection().fromPointToLatLng(worldPoint);
+		  return this.map.getProjection().fromPointToLatLng(worldPoint); */
+		  return this.map.unproject(point);
 	}
+	
+	Canvas.prototype.setIdle = function(bool){
+		 this.idle = bool;
+	 }
+	
 	
 
 //Controller class
@@ -317,7 +366,8 @@ function MazorManager(){
 	MazorManager.prototype.updatePosition = function(position){
 		
 		//console.log(string_of_enum(states,this.mazor.state));
-		console.log(getState(this.mazor.state));
+		//console.log(getState(this.mazor.state));
+		//console.log(this.canvas.idle);
 		if(this.mazor.isDeActivated()){
 			this.mouse.clickToActivate();
 			//this.checkToActivate(position);
@@ -366,8 +416,8 @@ function MazorManager(){
 						this.checkPanActivated(position);
 					} else {
 						if (this.checkToActivateZoomMode(position)){ 
-							
-							this.setZoomInOut(position);
+							this.prepareZoom(position);
+
 							var t = this;
 							zoomModeTimer = window.setInterval(function(){t.setZoomInOut(position);},zoomModeInterval);
 							
@@ -381,25 +431,25 @@ function MazorManager(){
 			clearTimeout(panTimer);		
 			clearTimeout(closeTimer);
 			//clearInterval(zoomModeTimer);
-				if (!this.checkToClose(position)){
-					if (this.checkToHighlightPan(position)){
-						this.checkPanActivated(position);
-					} else {
+				//if (!this.checkToClose(position)){
+					//if (this.checkToHighlightPan(position)){
+					//	this.checkPanActivated(position);
+					//} else {
 						this.checkToEndZoomPlusMode(position);
-					}
-				}
+					//}
+				//}
 		} else if (this.mazor.isZoomModeMinActivated()){
 			//Check if of icon
 			clearTimeout(panTimer);		
 			clearTimeout(closeTimer);
 			//clearInterval(zoomModeTimer);
-				if (!this.checkToClose(position)){
-					if (this.checkToHighlightPan(position)){
-						this.checkPanActivated(position);
-					} else {
+				//if (!this.checkToClose(position)){
+					//if (this.checkToHighlightPan(position)){
+					//	this.checkPanActivated(position);
+					//} else {
 						this.checkToEndZoomMinMode(position);
-					}
-				}
+				//	}
+				//}
 			
 		} else if (this.mazor.isPanActivated()){
 			this.mazor.activateFullPanMode();
@@ -509,23 +559,25 @@ function MazorManager(){
 	
 	MazorManager.prototype.checkToEndZoomPlusMode = function(position){
 
-		if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) > cursorBallRadius *2){
+		if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) > cursorBallRadius *2.5){
 	//		console.log(position.calcDistance(this.mazor.zoomIconMin.origin));
-			console.log('StopPlus');
 			clearInterval(zoomModeTimer);
-			this.mazor.activateZoom(position);
-			this.mazor.zoomIconPlus.notHighlightZoomIcon();
+			this.deActivateMazor();
+			//this.mazor.activateZoom(position);
+			//this.mazor.zoomIconPlus.notHighlightZoomIcon();
+			//this.mazor.marker.hide();
 		} 
 	}
 	
 	MazorManager.prototype.checkToEndZoomMinMode = function(position){
 
-		if (position.calcDistance(this.mazor.zoomIconMin.realPosition) > cursorBallRadius *2){
+		if (position.calcDistance(this.mazor.zoomIconMin.realPosition) > cursorBallRadius *2.5){
 //			console.log(position.calcDistance(this.mazor.zoomIconPlus.origin));
-			console.log('StopMin');
 			clearInterval(zoomModeTimer);
-			this.mazor.activateZoom(position);
-			this.mazor.zoomIconMin.notHighlightZoomIcon();
+			this.deActivateMazor();
+			//this.mazor.activateZoom(position);
+			//this.mazor.zoomIconMin.notHighlightZoomIcon();
+			//this.mazor.marker.hide();
 		} 
 	}
 	
@@ -574,16 +626,19 @@ function MazorManager(){
 			//this.taskManager.addZoom(this.canvas.getZoom()-1);
 			
 		} */
-		if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) < cursorBallRadius *2.5){
-			//console.log(position.calcDistance(this.mazor.zoomIconPlus.realPosition));
-			this.canvas.zoomIn();
-			console.log(this.canvas.getZoom());
-		} else if (position.calcDistance(this.mazor.zoomIconMin.realPosition) < cursorBallRadius *2.5){
-			//console.log(position.calcDistance(this.mazor.zoomIconMin.realPosition));
-			this.canvas.zoomOut();
-		} else {
-			clearInterval(zoomModeTimer);
-			//this.mazor.deActivateZoomMode();
+		//console.log(
+		// if (Math.round(this.canvas.getCenter().lat,20) == Math.round(newZoomCenter.lat,20) && Math.round(this.canvas.getCenter().lng,20) == Math.round(newZoomCenter.lng,20)) {
+		if (this.canvas.idle){
+			if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) < cursorBallRadius *2.5){
+				//console.log(position.calcDistance(this.mazor.zoomIconPlus.realPosition));
+				this.canvas.zoomIn();
+			} else if (position.calcDistance(this.mazor.zoomIconMin.realPosition) < cursorBallRadius *2.5){
+				//console.log(position.calcDistance(this.mazor.zoomIconMin.realPosition));
+				this.canvas.zoomOut();
+			} else {
+				clearInterval(zoomModeTimer);
+				//this.mazor.deActivateZoomMode();
+			}
 		}
 		
 		
@@ -650,13 +705,13 @@ function MazorManager(){
 		var speed = t.mazor.getSpeed(position);
 		
 		
-		//console.log(this.canvas.getCenter().lng(),this.canvas.getCenter().lat(),lng, lat);
+		//console.log(this.canvas.getCenter().lng,this.canvas.getCenter().lat,lng, lat);
 		//console.log(mouseDifLat, mouseDifLng);
 		// this is to move canvas to center
 		panModeTimer = window.setInterval(function(){t.canvas.pan(direction,speed);},panInterval);
 		if (this.directionCompare(oldDirection,direction,position)&& (speed < (oldSpeed -0.1 )||speed == 0 )) {
 			clearInterval(panModeTimer);
-			this.canvas.panLatLng(this.canvas.getCenter().lat() - mouseDifLat,this.canvas.getCenter().lng() - mouseDifLng);
+			this.canvas.panLatLng(this.canvas.getCenter().lat - mouseDifLat,this.canvas.getCenter().lng - mouseDifLng);
 		} else {
 			
 		}
@@ -774,7 +829,25 @@ function MazorManager(){
 		return this.mazor.isDeActivated();
 	}
 	
+	MazorManager.prototype.addMarker = function(latLng, mazor){
+		this.canvas.addMarker(latLng, mazor);
+	}
 	
+	MazorManager.prototype.prepareZoom = function(position){
+		this.canvas.setIdle(false);
+		this.mazor.hideForZoom();
+		this.mazor.moveToCenter();
+		this.canvas.map.flyTo({center:this.mazor.originLatLng, speed:0.2});
+		if (position.calcDistance(this.mazor.zoomIconMin.realPosition) > cursorBallRadius *5) {
+			this.mazor.zoomIconMin.hideAll();
+		} else if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) > cursorBallRadius *5) {
+			this.mazor.zoomIconPlus.hideAll();
+		}
+	}
+	
+	MazorManager.prototype.setIdle = function(bool){
+		 this.canvas.setIdle(bool);
+	 }
 				
 //Start of Mazor
 function Mazor(){
@@ -791,6 +864,7 @@ function Mazor(){
 	this.zoomIconPlus = new ZoomIconPlus();
 	this.panLine = new PanLine();
 	this.zoomDegrees;
+	this.marker = new Marker();
 }
 
 	//Only move the circels if not activated.
@@ -929,6 +1003,7 @@ function Mazor(){
 		this.zoomIconMin.hideAll();
 		this.zoomIconPlus.hideAll();
 		this.updatePosition(this.origin);
+		this.marker.hide();
 		//mazorManager.checkToActivate();
 	}
 	
@@ -941,6 +1016,9 @@ function Mazor(){
 	Mazor.prototype.notHighlightZoom = function(){
 			this.zoomIconMin.notHighlightZoom();
 			this.zoomIconPlus.notHighlightZoom();
+			this.zoomIconMin.notHighlightZoomIcon();
+			this.zoomIconPlus.notHighlightZoomIcon();
+			
 	}
 
 	Mazor.prototype.highlightPan = function(){
@@ -1038,7 +1116,22 @@ function Mazor(){
 		
 
 	}		
+
+	Mazor.prototype.moveToCenter = function(){
+		
+		this.marker.show();
+		newZoomCenter = this.originLatLng;
+		mazorManager.addMarker(this.originLatLng,this.marker.div);
+		
+	}	
 	
+	Mazor.prototype.hideForZoom	 = function(){
+		this.innerCircle.hide();
+		this.outerCircle.hide();
+		this.close.hide();
+		this.panIcon.hideAll();
+		this.panLine.hideAll();
+	}
 	
 function Element(){
 	this.div;
@@ -1125,6 +1218,11 @@ function CursorBall(){
 InnerCircle.prototype = new Element();
 function InnerCircle(){
 	this.setDiv('InnerCircle');	
+}
+
+Marker.prototype = new Element();
+function Marker(){
+	this.setDiv('Marker');	
 }
 
 MazorDeActivated.prototype = new Element();
@@ -1219,6 +1317,7 @@ ZoomIconMin.prototype.showNormal = function(){
 	this.show();
 	//this.zoomHolder.show();
 	//this.zoomHolder.showHolderOblique();
+	this.notHighlightZoomIcon();
 	this.activatedZoomImageMin.showNormal();
 	this.notHighlightZoom();
 }
@@ -1271,6 +1370,7 @@ ZoomIconPlus.prototype.showNormal = function(){
 	this.show();
 	//this.zoomHolder.show();
 	//this.zoomHolder.showHolderOblique();
+	this.notHighlightZoomIcon();
 	this.activatedZoomImagePlus.showNormal();
 	this.notHighlightZoom();
 }
@@ -1717,7 +1817,7 @@ function Task1(taskUserId, taskId){
 	this.number = taskId;
 	this.startText = "Taak 1: zoek Amsterdam Centraal<br>" + buttons;
 	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
-	this.location = new google.maps.LatLng(52.28958, 5.39524);
+	this.location = new mapboxgl.LngLat(5.39524,52.28958);
 	this.zoomFactor = 8;
 	
 }
@@ -1728,7 +1828,7 @@ function Task2(taskUserId, taskId){
 	this.number = taskId;
 	this.startText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + buttons;
 	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
-	this.location = new google.maps.LatLng(53.196635, 5.792486);
+	this.location = new mapboxgl.LngLat(5.792486,53.196635);
 	this.zoomFactor = 19;
 	
 }
@@ -1739,7 +1839,7 @@ function Task3(taskUserId, taskId){
 	this.number = taskId;
 	this.startText = "Taak 3: zoek een plek om eten te kopen langs de A31<br>" + buttons;
 	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
-	this.location = new google.maps.LatLng(53.368559, 7.305221);
+	this.location = new mapboxgl.LngLat(7.305221,53.368559);
 	this.zoomFactor = 16;
 	
 }
@@ -1750,7 +1850,7 @@ function Task4(taskUserId, taskId){
 	this.number = taskId;
 	this.startText = "Nu gewoon met MUIS en ZOOMEN rechtsonder <BR> Taak 4: zoek Rotterdam Centraal<br>" + buttonsMazor;
 	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
-	this.location = new google.maps.LatLng(52.28958, 5.39524);
+	this.location = new mapboxgl.LngLat(5.39524,52.28958);
 	this.zoomFactor = 8;
 	
 }
@@ -1761,7 +1861,7 @@ function Task5(taskUserId, taskId){
 	this.number = taskId;
 	this.startText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + buttonsMazor;
 	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
-	this.location = new google.maps.LatLng(50.849093, 5.695795);
+	this.location = new mapboxgl.LngLat(5.695795,50.849093);
 	this.zoomFactor = 19;
 	
 }
@@ -1772,7 +1872,7 @@ function Task6(taskUserId, taskId){
 	this.number = taskId;
 	this.startText = "Taak 6: zoek een plek om eten te kopen langs de A44<br>" + buttonsMazor;
 	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
-	this.location = new google.maps.LatLng(51.589606, 8.676892);
+	this.location = new mapboxgl.LngLat(8.676892,51.589606);
 	this.zoomFactor = 16;
 	
 }
@@ -1784,7 +1884,7 @@ function CloseUp(taskUserId, taskId){
 	this.number = taskId;
 	this.startText = "Bedankt voor je medewerking! <br> Ga terug naar het formulier";
 	this.stopText = "Je bent bijna klaar! <br> Ga terug naar het formulier om je mening te geven";
-	this.location = new google.maps.LatLng(53.368559, 7.305221);
+	this.location = new mapboxgl.LngLat(7.305221,53.368559);
 	mazorManager.taskManager.send();
 	
 }	
@@ -1807,13 +1907,13 @@ function getRealAngle(x) {
 
 
 /* 	Canvas.prototype.getHeight = function(){
-		//console.log((this.map.getBounds().getNorthEast().lat(),this.map.getBounds().getSouthWest().lat())/2, this.map.getCenter().lat());
-		return this.map.getBounds().getNorthEast().lat() - this.map.getBounds().getSouthWest().lat();
+		//console.log((this.map.getBounds().getNorthEast().lat,this.map.getBounds().getSouthWest().lat)/2, this.map.getCenter().lat);
+		return this.map.getBounds().getNorthEast().lat - this.map.getBounds().getSouthWest().lat;
 	}	
 	
 	Canvas.prototype.getWidth = function(){
-		//console.log(this.map.getBounds().getNorthEast().lng(),this.map.getBounds().getSouthWest().lng());
-		return this.map.getBounds().getNorthEast().lng() - this.map.getBounds().getSouthWest().lng();
+		//console.log(this.map.getBounds().getNorthEast().lng,this.map.getBounds().getSouthWest().lng);
+		return this.map.getBounds().getNorthEast().lng - this.map.getBounds().getSouthWest().lng;
 	}	
 	
 	//Zoom 
@@ -1882,14 +1982,14 @@ function getRealAngle(x) {
 		latLngBounds.extend(leftBottomNew);
 		
 		this.map.fitBounds(latLngBounds,0);
-		//console.log(markerBounds.getSouthWest().lat(),this.map.getBounds().getSouthWest().lat());
+		//console.log(markerBounds.getSouthWest().lat,this.map.getBounds().getSouthWest().lat);
 
 	}
 
 	Canvas.prototype.transformToPoint = function(markerBound){
 		var p = new Point();
-		p.x = markerBound.lng() +  180;
-		p.y = markerBound.lat() + 90;
+		p.x = markerBound.lng +  180;
+		p.y = markerBound.lat + 90;
 		return p;
 	}
 	
@@ -1902,14 +2002,14 @@ function getRealAngle(x) {
 		//Met deze tussenstap wordt de berekening makkelijker, maar waarschijnlijk gaat hij nu schuiven. We gaan het zien.
 		
 		
-		//var lng = this.centerLatLng.lng() + (zoomFactor * (this.mazorX /100));
-		//var lat = this.centerLatLng.lat() + (zoomFactor * (this.mazorY /100));
-		//var lng = this.centerLatLng.lng() + (((this.canvasWidth * (zoomFactor/100))-this.canvasWidth)/4) ;
+		//var lng = this.centerLatLng.lng + (zoomFactor * (this.mazorX /100));
+		//var lat = this.centerLatLng.lat + (zoomFactor * (this.mazorY /100));
+		//var lng = this.centerLatLng.lng + (((this.canvasWidth * (zoomFactor/100))-this.canvasWidth)/4) ;
 		//canvas width en height worden gezet per zoomLevel
-		//var lat = this.centerLatLng.lat() - (((this.canvasHeight * (zoomFactor/100)) - this.canvasHeight)/4) ;
+		//var lat = this.centerLatLng.lat - (((this.canvasHeight * (zoomFactor/100)) - this.canvasHeight)/4) ;
 		i = i +1;
-		var lng = this.centerLatLng.lng() + (0.028* i*((1/(zoomFactor/100)))) ;
-		var lat = this.centerLatLng.lat() - (0.0249* i*(1/(zoomFactor/100)));
+		var lng = this.centerLatLng.lng + (0.028* i*((1/(zoomFactor/100)))) ;
+		var lat = this.centerLatLng.lat - (0.0249* i*(1/(zoomFactor/100)));
 		var latLng = new google.maps.LatLng(lat,lng);
 	
 		//console.log(this.mazorX,  (((this.mazorX* (zoomFactor/100))-this.mazorX)) );
@@ -1921,11 +2021,11 @@ function getRealAngle(x) {
 	
 	Canvas.prototype.zoomCanvasOut = function(originLatLng){
 		//this.zoomCanvas(originLatLng);
-		var lng = this.centerLatLng.lng() - (((this.mazorX* (zoomFactor/100))-this.mazorX)) ;
+		var lng = this.centerLatLng.lng - (((this.mazorX* (zoomFactor/100))-this.mazorX)) ;
 		//canvas width en height worden gezet per zoomLevel
-		var lat = this.centerLatLng.lat() + (((this.mazorY * (zoomFactor/100)) - this.mazorY)) ;
+		var lat = this.centerLatLng.lat + (((this.mazorY * (zoomFactor/100)) - this.mazorY)) ;
 		var latLng = new google.maps.LatLng(lat,lng);
-		//console.log(latLng.lat(),latLng.lng());
+		//console.log(latLng.lat,latLng.lng);
 		//this.map.setCenter(latLng);
 	}
 	
@@ -1947,9 +2047,9 @@ function getRealAngle(x) {
 	} */
 	
 	/* 	Canvas.prototype.setMazorOrigin = function(originLatLng){
-		this.centerLatLng = new google.maps.LatLng(this.map.getCenter().lat(),this.map.getCenter().lng());
-		this.mazorX = originLatLng.lng() - this.map.getCenter().lng();
-		this.mazorY = originLatLng.lat() - this.map.getCenter().lat();	
+		this.centerLatLng = new google.maps.LatLng(this.map.getCenter().lat,this.map.getCenter().lng);
+		this.mazorX = originLatLng.lng - this.map.getCenter().lng;
+		this.mazorY = originLatLng.lat - this.map.getCenter().lat;	
 		
 		var markerBounds = this.map.getBounds();
 		//this.canvasHeight = this.getHeight();

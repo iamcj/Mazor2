@@ -99,7 +99,7 @@ function Mouse(){
 			var oldLat = mazorManager.point2LatLng(position);
 			mouseDifLat = oldLat.lat() - mazorManager.point2LatLng(previousPosition).lat();
 			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
-			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
+			console.log(mouseDifLat);
 			if (!disable){
 				mazorManager.updatePosition(position);
 			}
