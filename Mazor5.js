@@ -206,7 +206,7 @@ function Canvas(){
              setIdle(true);
           });
 		 
-		 
+		 this.map.scrollZoom.disable();
 		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
 /* 		this.map.addListener('mousemove', function (event) {
               mouseLatLng = event.latLng;
@@ -231,7 +231,7 @@ function Canvas(){
 	Canvas.prototype.normalMode = function(){
 		//this.map.setOptions({  zoomControl: true  });
 		//this.map.setOptions({  gestureHandling: 'auto'  });
-		this.map.scrollZoom.enable();
+		//this.map.scrollZoom.disable();
 		this.map.dragPan.enable();
 		//control.remove();
 		
@@ -240,7 +240,7 @@ function Canvas(){
 	Canvas.prototype.mazorMode = function(){
 		//this.map.setOptions({  zoomControl: true  });
 		//this.map.setOptions({  gestureHandling: 'auto'  });
-		this.map.scrollZoom.disable();
+		//this.map.scrollZoom.disable();
 		this.map.dragPan.disable();
 		this.removeControl();
 		
