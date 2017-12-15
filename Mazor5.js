@@ -206,8 +206,7 @@ function Canvas(){
              setIdle(true);
           });
 		 
-		 this.map.dragPan.disable();
-		 this.map.scrollZoom.disable();
+
 		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
 /* 		this.map.addListener('mousemove', function (event) {
               mouseLatLng = event.latLng;
@@ -221,6 +220,9 @@ function Canvas(){
 			// mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
 
           // }); 
+		  
+		 this.map.dragPan.disable();
+		 this.map.scrollZoom.disable();
 	}
 	
 	Canvas.prototype.addMarker = function(latLng, mazor){
