@@ -207,8 +207,6 @@ function Canvas(){
           });
 		 
 		 this.map.dragPan.disable();
-		 
-		 this.map.scrollZoom.disable();
 		 this.map.scrollZoom.disable();
 		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
 /* 		this.map.addListener('mousemove', function (event) {
