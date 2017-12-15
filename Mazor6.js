@@ -186,7 +186,7 @@ function Canvas(){
 		 //var latLng = new mapboxgl.LngLat(118.245270,-5.046043 );
 		 var latLng = new mapboxgl.LngLat(5.39524,52.28958);
 		
-		mapboxgl.accessToken = 'pk.eyJ1IjoiaWFtY2oiLCJhIjoiY2phd3Z0ajFtMG9mYTMwcGk2MjE4OGc1YyJ9.WmhfzYT1kijQRhyNfPZSVA';
+		mapboxgl.accessToken = 'pk.eyJ1IjoiaWFtY2oiLCJhIjoiY2piN3c3eWsxMHk1NjJycjZwcXZrdWh0dSJ9.2MdiDMGbpozKvzeOkMVz3A';
 		this.map = new mapboxgl.Map({
 		container: 'Canvas',
 		zoom: zoomLevel,
