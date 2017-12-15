@@ -207,6 +207,10 @@ function Canvas(){
           });
 		 
 		 this.map.dragPan.disable();
+<<<<<<< HEAD
+=======
+		 
+>>>>>>> gh-pages
 		 this.map.scrollZoom.disable();
 		 this.map.scrollZoom.disable();
 		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
