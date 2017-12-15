@@ -14,7 +14,6 @@ var previousPosition;
 var mouseDifLat;
 var mouseDifLng;
 var zoomAngle;
-var start=true;
 var buttons= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
 var buttonsMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
 var buttonEasyMouse= "<div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMazor()'>Met een gewone muis was het sneller gegaan</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor is het sneller gegaan</div>"
@@ -23,6 +22,7 @@ var newZoomCenter;
 var hosp1;
 var rest1;
 var rest2;
+var control;
 
 
 //settings
@@ -120,7 +120,7 @@ function Mouse(){
 		// For the rest of the movingg
 	function onMouseClick(e) {
 		mazorManager.addClick();
-		if (!inButtonArea(e.pageX,e.pageY) && start){
+		if (!inButtonArea(e.pageX,e.pageY) && !disable){
 			if (mazorManager.isMazorDeActived()) {
 				mazorManager.checkToActivate(previousPosition);
 			} else {
@@ -194,8 +194,7 @@ function Canvas(){
 		style: 'mapbox://styles/mapbox/streets-v10'
 		});
 		
-		this.map.scrollZoom.disable();
-		this.map.dragPan.disable();
+		 control = this.map.addControl(new mapboxgl.NavigationControl());
 		 
 		 this.map.on('mousemove', function (event) {
               mouseLatLng = event.lngLat;
@@ -234,7 +233,17 @@ function Canvas(){
 		//this.map.setOptions({  gestureHandling: 'auto'  });
 		this.map.scrollZoom.enable();
 		this.map.dragPan.enable();
-		this.map.addControl(new mapboxgl.NavigationControl());
+		//control.remove();
+		
+	}
+	
+	Canvas.prototype.mazorMode = function(){
+		//this.map.setOptions({  zoomControl: true  });
+		//this.map.setOptions({  gestureHandling: 'auto'  });
+		this.map.scrollZoom.disable();
+		this.map.dragPan.disable();
+		this.removeControl();
+		
 	}
 	
 	Canvas.prototype.getGestureHandling = function(){
@@ -352,6 +361,12 @@ function Canvas(){
 		 this.idle = bool;
 	 }
 	
+	Canvas.prototype.removeControl = function(){
+		   var cols = document.getElementsByClassName('mapboxgl-ctrl-top-right');
+			for(i=0; i<cols.length; i++) {
+				cols[i].style.visibility =    'hidden';
+			}
+	 }
 	
 
 //Controller class
@@ -822,11 +837,17 @@ function MazorManager(){
 		}
 	}
 	
-	MazorManager.prototype.change = function(){
+	MazorManager.prototype.changeToMouse = function(){
 		disable = true;
-		start = false; 
 		this.mazor.hideAll(this.mazor.origin);
 		this.canvas.normalMode();
+	//REMINDER	document.addEventListener('click', onMouseClick, false);
+	}
+	
+	MazorManager.prototype.changeToMazor = function(){
+		disable = false;
+		this.mazor.MazorDeActivated.show();
+		this.canvas.mazorMode();
 	//REMINDER	document.addEventListener('click', onMouseClick, false);
 	}
 	
@@ -1606,6 +1627,7 @@ function TaskManager(){
 		switch(this.taskCount){
 			case 1: 
 				var task = new Task1(this.userId,taskId);
+				mazorManager.changeToMouse();
 				break;
 			case 2: 
 				var task = new Task2(this.userId,taskId);
@@ -1631,7 +1653,7 @@ function TaskManager(){
 				var task = new Task4(this.userId,taskId);
 				rest1.remove();
 				rest2.remove();
-				mazorManager.change();
+				mazorManager.changeToMazor();
 				break;	
 			case 5: 
 				var task = new Task5(this.userId,taskId);
@@ -1858,8 +1880,8 @@ Task1.prototype = new Task();
 function Task1(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.startText = "Taak 1: zoek Amsterdam Centraal<br>" + buttons;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
+	this.startText = "Zo nu eerste met de MUIS en zoomen rechtsboven<BR>Taak 1: zoek Amsterdam Centraal<br>" + buttonsMazor;
+	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
 	this.location = new mapboxgl.LngLat(5.39524,52.28958);
 	this.zoomFactor = 7;
 	
@@ -1869,8 +1891,8 @@ Task2.prototype = new Task();
 function Task2(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.startText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + buttons;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
+	this.startText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + buttonsMazor;
+	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
 	this.location = new mapboxgl.LngLat(5.792486,53.196635);
 	this.zoomFactor = 18;
 	
@@ -1880,8 +1902,8 @@ Task3.prototype = new Task();
 function Task3(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.startText = "Taak 3: zoek een plek om eten te kopen langs de A31<br>" + buttons;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
+	this.startText = "Taak 3: zoek een plek om eten te kopen langs de A31<br>" + buttonsMazor;
+	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
 	this.location = new mapboxgl.LngLat(7.305221,53.368559);
 	this.zoomFactor = 15;
 	
@@ -1891,8 +1913,8 @@ Task4.prototype = new Task();
 function Task4(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.startText = "Nu gewoon met MUIS en ZOOMEN rechtsboven <BR> Taak 4: zoek Rotterdam Centraal<br>" + buttonsMazor;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
+	this.startText = "En dan nu met de MAZOR <BR> Taak 4: zoek Rotterdam Centraal<br>" + buttons;
+	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
 	this.location = new mapboxgl.LngLat(5.39524,52.28958);
 	this.zoomFactor = 7;
 	
@@ -1902,8 +1924,8 @@ Task5.prototype = new Task();
 function Task5(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.startText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + buttonsMazor;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
+	this.startText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + buttons;
+	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
 	this.location = new mapboxgl.LngLat(5.695795,50.849093);
 	this.zoomFactor = 18;
 	
@@ -1913,8 +1935,8 @@ Task6.prototype = new Task();
 function Task6(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-	this.startText = "Taak 6: zoek een plek om eten te kopen langs de A44<br>" + buttonsMazor;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
+	this.startText = "Taak 6: zoek een plek om eten te kopen langs de A44<br>" + buttons;
+	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
 	this.location = new mapboxgl.LngLat(8.676892,51.589606);
 	this.zoomFactor = 15;
 	

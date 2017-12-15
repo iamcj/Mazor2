@@ -1130,27 +1130,27 @@ function InnerCircle(){
 MazorDeActivated.prototype = new Element();
 function MazorDeActivated(){
 	this.setDiv('MazorDeActivated');	
-	this.startText = new StartText();
+	//this.startText = new StartText();
 	this.showText = false
 }
 
 	MazorDeActivated.prototype.showAll = function(){
 		this.show();
-		if (!this.showText) {
-			this.startText.show();
-		}
-		this.showText = true;
+		//if (!this.showText) {
+		//	this.startText.show();
+		//}
+		//this.showText = true;
 	}
 	
 	MazorDeActivated.prototype.hideAll = function(){
 		this.hide();
-		this.startText.hide();
+		//this.startText.hide();
 		document.getElementById('Task').style.setProperty('visibility', 'visible');
 	}
 	
 	MazorDeActivated.prototype.updatePositionAll = function(position){
 		this.updatePosition(position);
-		this.startText.updatePosition(position);
+		//this.startText.updatePosition(position);
 	}
 
 StartText.prototype = new Element();
