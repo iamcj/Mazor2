@@ -154,6 +154,10 @@ function Mouse(){
 		}
 	}
 	
+	function hideMarkers() {
+		mazorManager.hideMarkers();
+	}
+	
 //View Class
 function Canvas(){
 	this.map;
@@ -196,6 +200,10 @@ function Canvas(){
 		
 		 control = this.map.addControl(new mapboxgl.NavigationControl());
 		 
+		 this.map.on('zoomend', function (event) {
+				hideMarkers();
+          });
+		 
 		 this.map.on('mousemove', function (event) {
               mouseLatLng = event.lngLat;
 			//  mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
@@ -205,6 +213,9 @@ function Canvas(){
  		  this.map.on('moveend', function (event) {
              setIdle(true);
           });
+		  
+
+		 
 		 
 
 		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
@@ -876,16 +887,50 @@ function MazorManager(){
 		this.canvas.setIdle(false);
 		this.mazor.hideForZoom();
 		this.mazor.moveToCenter();
-		this.canvas.map.flyTo({center:this.mazor.originLatLng, speed:0.2});
+		
 		if (position.calcDistance(this.mazor.zoomIconMin.realPosition) > cursorBallRadius *5) {
+			this.canvas.map.flyTo({center:this.mazor.originLatLng, speed:0.2, zoom:this.canvas.getZoom()+0.4});
 			this.mazor.zoomIconMin.hideAll();
 		} else if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) > cursorBallRadius *5) {
+			this.canvas.map.flyTo({center:this.mazor.originLatLng, speed:0.2, zoom:this.canvas.getZoom()-0.4});
 			this.mazor.zoomIconPlus.hideAll();
 		}
 	}
 	
 	MazorManager.prototype.setIdle = function(bool){
 		 this.canvas.setIdle(bool);
+	 }
+	 
+	 MazorManager.prototype.hideMarkers = function(bool){
+		 
+		if (this.canvas.getZoom() <13) {
+ 			 document.getElementById('Hospital2').style.setProperty('visibility', 'hidden');
+		} else {
+			 if (this.taskManager.taskCount == 5) {
+				document.getElementById('Hospital2').style.setProperty('visibility', 'visible');
+			 }
+			
+		}
+		if (this.canvas.getZoom() <15) {
+ 			 document.getElementById('Restaurant').style.setProperty('visibility', 'hidden');
+			 document.getElementById('Restaurant1').style.setProperty('visibility', 'hidden');
+			 document.getElementById('Restaurant2').style.setProperty('visibility', 'hidden');
+			 document.getElementById('Restaurant3').style.setProperty('visibility', 'hidden');
+			 document.getElementById('Hospital').style.setProperty('visibility', 'hidden');
+
+		} else {
+			 if (this.taskManager.taskCount == 3) {
+				document.getElementById('Restaurant').style.setProperty('visibility', 'visible');
+				document.getElementById('Restaurant1').style.setProperty('visibility', 'visible');
+			 }
+			 if (this.taskManager.taskCount == 6) {
+				document.getElementById('Restaurant2').style.setProperty('visibility', 'visible');
+				document.getElementById('Restaurant3').style.setProperty('visibility', 'visible');
+			 }
+			 if (this.taskManager.taskCount == 2) {
+				document.getElementById('Hospital').style.setProperty('visibility', 'visible');
+			 }
+		 }
 	 }
 				
 //Start of Mazor
@@ -1643,7 +1688,7 @@ function TaskManager(){
 			case 3: 
 				var task = new Task3(this.userId,taskId);
 				
-				hosp1.remove();
+			//	hosp1.remove();
 				var loc = new mapboxgl.LngLat(7.457316,53.311943);
 				rest1 = mazorManager.canvas.addMarker(loc,document.getElementById('Restaurant'));
 				document.getElementById('Restaurant').style.setProperty('visibility', 'visible');
@@ -1654,8 +1699,8 @@ function TaskManager(){
 				break;
 			case 4: 
 				var task = new Task4(this.userId,taskId);
-				rest1.remove();
-				rest2.remove();
+			//	rest1.remove();
+			//	rest2.remove();
 				mazorManager.changeToMazor();
 				break;	
 			case 5: 
