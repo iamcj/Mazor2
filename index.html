@@ -7,10 +7,8 @@
 
 	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvL2k6CAZsw17rXuYWtryOXwkeejq8UWY&callback=init" type="text/javascript"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	
 	<script src="Mazor.js"></script>
-	<script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
-	<link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
+	<script src="https://smtpjs.com/v2/smtp.js"></script>
 	<link rel="stylesheet" href="Mazor.css" />
 
 </head>
@@ -24,15 +22,7 @@
 		</svg>
 	</div>
 	
-	<!--<div id="ActivateText" class="default">Druk op m of z om de mazor te (de)activeren<BR>Tip: deactiveer om de mazor te verplaatsen!</div>-->
-  
-  	<div id="Marker" class="default">
-		<svg class="MazorCircle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<circle cx="45" cy="45" r="9" />
-		<circle cx="45" cy="45" r="27" />
-		<circle cx="45" cy="45" r="45" />
-		</svg>
-	</div>
+	<div id="ActivateText" class="default">Druk op m of z om de mazor te (de)activeren<BR>Tip: deactiveer om de mazor te verplaatsen!</div>
   
 	<div id="CursorBall" class="default">
 		<svg class = "CursorBall" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -79,8 +69,12 @@
 		<div id="PanIconImage" class="default IconImage">
 			<img id="PanIconImage1515" src="PanIcon1515.png"></img>
 		</div>
-	</div>	
+	</div>
 	
+	<div id="Task">
+		<span id="TaskText" >Oefenen: <br>Zoek bijvoorbeeld een vliegveld bij Jakarta of een moskee op Bali.
+		<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Ik ben klaar met oefenen</div></span>
+	</div>
 	
 	<div id="PanLine" class=" default " >
 		<div class="spacer"></div>
