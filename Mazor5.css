@@ -3,6 +3,7 @@ html, body{
     width: 100%;
 	overflow-x: hidden;
 	overflow-y: hidden;
+	cursor: auto !important;
 }
 
 :root {
@@ -196,7 +197,6 @@ svg.PanIcon {
 	border-radius: 5px;
 	display: table;
 	padding: 10px;
-	visibility:hidden;
 	
 }
 #TaskText {
@@ -256,6 +256,10 @@ svg.PanIcon {
 	
 }
 
+#marker {
+    cursor: pointer;
+}
+
 .mapboxgl-canvas-container.mapboxgl-interactive,
 .mapboxgl-ctrl-nav-compass {
     cursor: auto !important;
@@ -264,3 +268,4 @@ svg.PanIcon {
 .mapboxgl-ctrl-nav-compass:active {
 	cursor: auto !important;
 }
+

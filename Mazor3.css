@@ -3,6 +3,7 @@ html, body{
     width: 100%;
 	overflow-x: hidden;
 	overflow-y: hidden;
+	cursor: auto !important;
 }
 
 :root {
@@ -35,6 +36,7 @@ html, body{
 }
 
 #Canvas {
+	cursor: auto !important;
 	position:absolute;
 	z-index: 1;
 	height: 98%;
@@ -125,7 +127,7 @@ svg.MagnifyingGlass {
 	pointer-events:none; 
   }
 
-.ZoomHolderOblique {
+/* .ZoomHolderOblique {
 	position: absolute;
 	left: -5px;
 	top: 12px;
@@ -144,7 +146,7 @@ svg.MagnifyingGlass {
 	height: 4px;
 	width: 15px;
 	background-color: var(--ZoomColor);
-}
+} */
 
 .Icon{
 	z-index:4;
@@ -189,14 +191,13 @@ svg.PanIcon {
 	position:absolute;
 	left: 15px;
 	top: 15px;
-	height: 145px;
+	height: 185px;
 	width: 385px;
 	background-color: var(--TextButtonColor);
 	border: 1px solid grey;
 	border-radius: 5px;
 	display: table;
 	padding: 10px;
-	visibility:hidden;
 	
 }
 #TaskText {
@@ -210,31 +211,6 @@ svg.PanIcon {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-#ActivateText {
-	background-color: red;
-	text-align: center;
-	border: 1px solid grey;
-	border-radius: 5px;
-	color: white;
-	font-weight: bold;
-	height: 40px;
-	width:350px;
-	padding:5px;
-	font-family: arial;
-	  -webkit-user-select: none;
-	  -moz-user-select: none;
-	  -ms-user-select: none;
-	  user-select: none;
-}
-
-.blink_me {
-  animation: blinker 2s linear infinite;
-}
-
-@keyframes blinker {  
-  50% { opacity: 0; }
 }
 
 .Button {
@@ -256,6 +232,14 @@ svg.PanIcon {
 	
 }
 
+#marker {
+    border: 1px solid black;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
 .mapboxgl-canvas-container.mapboxgl-interactive,
 .mapboxgl-ctrl-nav-compass {
     cursor: auto !important;
@@ -264,3 +248,5 @@ svg.PanIcon {
 .mapboxgl-ctrl-nav-compass:active {
 	cursor: auto !important;
 }
+
+
