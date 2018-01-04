@@ -19,14 +19,13 @@ html, body{
   --PanColor: var(--blue-color);
   --PanFillColor: var(--white-color);
   --MazorColor: var(--blue-color);
-  --TextButtonColor: red;
 }
 
 .default {
-	z-index: 3;
+	z-index: 2;
 	position:absolute;
 	visibility:hidden;
-	pointer-events:none; 	
+	pointer-events:none; 
 }
 
 #Wrapper{
@@ -62,7 +61,7 @@ html, body{
   
 /* Activated */
  #CursorBall  {
-	 z-index:4;
+	 z-index:3;
 
   }
  
@@ -179,62 +178,3 @@ svg.PanIcon {
   background-color: var(--PanColor);
 }
 
-.spacer {
-  width: 7px;
-  height: 1px;
-}
-
-#Task {
-	z-index: 2;
-	position:absolute;
-	left: 15px;
-	top: 15px;
-	height: 185px;
-	width: 385px;
-	background-color: var(--TextButtonColor);
-	border: 1px solid grey;
-	border-radius: 5px;
-	display: table;
-	padding: 10px;
-	
-}
-#TaskText {
-	display: table-cell;
-	text-align: center;
-	color: white;
-	vertical-align: middle;
-	line-height: 175%;
-	font-family: arial;
-	  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.Button {
-		border: 2px solid white;
-			color: red;
-			background-color: white;
-	border-radius: 5px;
-	padding:3px;
-	width: 370px;
-	
-}
-
-.Button:hover { 
-    font-weight: bold;
-}
-
-.Spacer {
-	height: 10px;
-	
-}
-
-.mapboxgl-canvas-container.mapboxgl-interactive,
-.mapboxgl-ctrl-nav-compass {
-    cursor: auto !important;
-}
-.mapboxgl-canvas-container.mapboxgl-interactive:active,
-.mapboxgl-ctrl-nav-compass:active {
-	cursor: auto !important;
-}

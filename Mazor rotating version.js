@@ -77,15 +77,11 @@ function Mouse(){
 		// For the rest of the movingg
 	function onMouseClick(e) {
 		mazorManager.addClick();
-		if (!inButtonArea(e.pageX,e.pageY)){
-			if (mazorManager.isMazorDeActivated()) {
-				mazorManager.checkToActivate(mazorManager.previousPosition);
-			} else {
-				mazorManager.deActivateMazor(mazorManager.previousPosition);
-				// put mazor at the place of the mouse
-				mazorManager.updatePosition(mazorManager.previousPosition);
-			}
-		} 
+		if (!inButtonArea(e.pageX,e.pageY) && mazorManager.start){
+			var position = new Point(e.pageX,e.pageY);
+			mazorManager.checkToActivate(position);
+			document.removeEventListener('click', onMouseClick, false);
+		}
 	}
 	
 	function onMouseClickDisabled(e) {
@@ -129,7 +125,7 @@ function Canvas(){
 		});
 		
 		this.map.scrollZoom.disable();
-		//this.map.dragPan.disable();
+		this.map.dragPan.disable();
 		 
 		 this.map.on('mousemove', function (event) {
               mouseLatLng = event.lngLat;
@@ -158,17 +154,18 @@ function Canvas(){
 			mazorManager.zoomAngle = angle+1;
 		}
 
-		if (angle < mazorManager.zoomAngle -5){
-			var zoomToAdd = (((mazorManager.zoomAngle-angle) *2)/30)/10;
-			var zoomFactor = Math.pow(2,zoomToAdd);
-			var devideFactor = 1/(1-(1/zoomFactor));
+		var zoomToAdd = 0.1;
+		var zoomFactor = Math.pow(2,zoomToAdd);
+		var devideFactor = 1/(1-(1/zoomFactor));
+		console.log(devideFactor);
 		
+		if (angle < mazorManager.zoomAngle -2){
 			var lat = (mazorManager.mazor.originLatLng.lat - this.getCenter().lat)/devideFactor;
 			var lng = (mazorManager.mazor.originLatLng.lng - this.getCenter().lng)/devideFactor;
 			var newZoom = this.map.getZoom()+zoomToAdd;
 			var newCenter = new mapboxgl.LngLat( this.getCenter().lng + lng, this.getCenter().lat + lat);
 			this.map.jumpTo({zoom: newZoom, center: newCenter});
-			//mazorManager.zoomAngle = angle;
+			mazorManager.zoomAngle = angle;
 			
 		}
 		
@@ -179,21 +176,20 @@ function Canvas(){
 		if (!mazorManager.zoomAngle|| mazorManager.zoomAngle >357.9 || angle < mazorManager.zoomAngle){
 			mazorManager.zoomAngle = angle-1;
 		}
-
-		if (angle > mazorManager.zoomAngle + 5){
-					
-			var zoomToSub = (((angle-mazorManager.zoomAngle) *2)/30)/10;
-			var zoomFactor = Math.pow(2,zoomToSub);
-			var multiplyFactor = -1 + Math.pow(2,zoomToSub);
 		
+		var zoomToAdd = 0.1
+		var zoomFactor = Math.pow(2,zoomToAdd);
+		var multiplyFactor = -1 + Math.pow(2,zoomToAdd);
+
+		if (angle > mazorManager.zoomAngle + 2){
 			var lat = (mazorManager.mazor.originLatLng.lat - this.getCenter().lat)*multiplyFactor;
 			var lng = (mazorManager.mazor.originLatLng.lng - this.getCenter().lng)*multiplyFactor;
 			//this.map.setZoom(this.map.getZoom()-zoomToAdd);
 			//this.panLatLng( this.getCenter().lat - lat,this.getCenter().lng - lng);
-			var newZoom = this.map.getZoom() -zoomToSub;
+			var newZoom = this.map.getZoom() -zoomToAdd;
 			var newCenter = new mapboxgl.LngLat( this.getCenter().lng - lng, this.getCenter().lat - lat);
 			this.map.jumpTo({zoom: newZoom, center: newCenter});
-			//mazorManager.zoomAngle =angle;
+			mazorManager.zoomAngle =angle;
 		}
 		
 	}
@@ -397,12 +393,17 @@ function MazorManager(){
 		var angle = this.mazor.origin.calcAngle(position); ;
 		
 		if (angle> this.mazor.zoomDegrees){
+			//set icon
 			this.mazor.showPlus();
+			zoomFactor = zoomFactor + zoomChange;
 			this.canvas.zoomIn(getRealAngle(this.mazor.origin.calcAngle(position)));
 			
 		} else {
 			this.mazor.showMin();
-			this.canvas.zoomOut(getRealAngle(this.mazor.origin.calcAngle(position)));	
+			this.canvas.zoomOut(getRealAngle(this.mazor.origin.calcAngle(position)));
+			//change zoomlevel
+			zoomFactor = zoomFactor - zoomChange;
+			
 		}
 		
 		this.mazor.zoomDegrees = angle;
@@ -581,11 +582,7 @@ function MazorManager(){
 
 	MazorManager.prototype.panTo= function(location){
 		this.canvas.panTo(location);
-	}	
-
-	MazorManager.prototype.isMazorDeActivated = function(){
-		return (this.mazor.state == mazorManager.states.DEACTIVATED);
-	}	
+	}		
 	
 	MazorManager.prototype.zoom= function(zoomFactor){
 		this.canvas.zoom(zoomFactor);
@@ -659,12 +656,11 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.activateZoom = function(position){
-		
+		mazorManager.zoomAngle = null;
 		this.setState(mazorManager.states.ZOOMACTIVATED);
 		this.zoomIcon.highlightZoom();		
 		this.zoomIcon.showTwoWay();
 		this.zoomDegrees = this.origin.calcAngle(position);
-		mazorManager.zoomAngle = getRealAngle(this.zoomDegrees);
 		// extra stuff for if you come from panmode
 		this.panIcon.showNormal();
 		this.panIcon.rotateIcon(this.origin.calcAngle(position));
