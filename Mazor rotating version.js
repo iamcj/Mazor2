@@ -1,28 +1,8 @@
 // Date: 2017
 // Auteur:Corjan van Uffelen
 var mazorManager;
-<<<<<<< HEAD
 var disable=false;
 var mouseLatLng;
-=======
-var timer;
-var closeTimer;
-var zoomTimer;
-var zoomModeTimer;
-var panTimer;
-var panModeTimer;
-var states = {DEACTIVATED:1, ACTIVATED:2, ACTIVATEDCLOSABLE:3, ZOOMACTIVATED:4, ZOOMMODEPLUS:6, ZOOMMODEMIN:7, PANACTIVATED:8,FULLPANMODEACTIVATED:9};
-var mouseLatLng;
-var previousPosition;
-var mouseDifLat;
-var mouseDifLng;
-var zoomAngle;
-var start=true;
-var buttons= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
-var buttonsMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
-var buttonEasyMouse= "<div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMazor()'>Met een gewone muis was het sneller gegaan</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor is het sneller gegaan</div>"
-var buttonEasyMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor was het sneller gegaan</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMazor()'>Met de Muis is het sneller gegaan</div>"
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 
 //settings
 var timeOutms = 400;
@@ -37,17 +17,10 @@ var zoomLevel = 5;
 var zoomChange = 2;
 var maxPanDistance = 170;
 var panInterval = 10;
-<<<<<<< HEAD
 var panStep = 0.0004;
-=======
-var zoomModeInterval = 750;
-var panStep = 0.001;
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 var i=0;
 var oldDirection = 400;
 var oldSpeed = -1;
-var zoomIconMinAngle = 40;
-var zoomIconPlusAngle = zoomIconMinAngle+3;
 
 // Start Mazor
 function init(){
@@ -62,7 +35,6 @@ function Mouse(){
 	// To show mazor on first move
 	Mouse.prototype.init = function(){
 		document.addEventListener('mousemove', onMouseUpdateInit, false);
-		document.addEventListener('keydown', onKeyDown, false);
 		if (disable) {
 			document.addEventListener('click', onMouseClickDisabled, false);
 			document.addEventListener('wheel', onWheel, false);
@@ -74,21 +46,6 @@ function Mouse(){
 		document.addEventListener('wheel', onWheel, false);
 	}
 
-	function onKeyDown(e) {
-		var zKey = 90;
-		var mKey = 77;
-		if(e.keyCode == zKey||e.keyCode == mKey) {
-
-			if (mazorManager.isMazorDeActived()) {
-				mazorManager.checkToActivate(previousPosition);
-			} else {
-				mazorManager.deActivateMazor(previousPosition);
-				// put mazor at the place of the mouse
-				mazorManager.updatePosition(previousPosition);
-			}
-		} 
-	}
-	
 	// To show mazor on first move
 	function onMouseUpdateInit(e) {
 		mazorManager.init(e.pageX,e.pageY);
@@ -103,14 +60,8 @@ function Mouse(){
 		if (!inButtonArea(e.pageX,e.pageY)) {
 			var position= new Point(e.pageX, e.pageY);
 			var oldLat = mazorManager.point2LatLng(position);
-<<<<<<< HEAD
 			mazorManager.mouseDifLat = oldLat.lat - mazorManager.point2LatLng(mazorManager.previousPosition).lat;
 			mazorManager.mouseDifLng = mazorManager.point2LatLng(position).lng - mazorManager.point2LatLng(mazorManager.previousPosition).lng;
-=======
-			mouseDifLat = oldLat.lat() - mazorManager.point2LatLng(previousPosition).lat();
-			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
-			
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 			if (!disable){
 				mazorManager.updatePosition(position);
 			}
@@ -126,28 +77,14 @@ function Mouse(){
 		// For the rest of the movingg
 	function onMouseClick(e) {
 		mazorManager.addClick();
-<<<<<<< HEAD
-		if (!inButtonArea(e.pageX,e.pageY)){
-			if (mazorManager.isMazorDeActivated()) {
-				mazorManager.checkToActivate(mazorManager.previousPosition);
-			} else {
-				mazorManager.deActivateMazor(mazorManager.previousPosition);
-				// put mazor at the place of the mouse
-				mazorManager.updatePosition(mazorManager.previousPosition);
-			}
-		} 
-=======
-	
-/* 		if (!inButtonArea(e.pageX,e.pageY) && start){
+		if (!inButtonArea(e.pageX,e.pageY) && mazorManager.start){
 			var position = new Point(e.pageX,e.pageY);
 			mazorManager.checkToActivate(position);
 			document.removeEventListener('click', onMouseClick, false);
-		} */
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
+		}
 	}
 	
 	function onMouseClickDisabled(e) {
-		
 		mazorManager.addClick();
 	}
 	
@@ -156,7 +93,7 @@ function Mouse(){
 	}
 	
 	function inButtonArea(x,y){
-		if (x <425 && y < 185) {
+		if (x <425 && y < 225) {
 			return true;
 		}
 	}
@@ -188,7 +125,7 @@ function Canvas(){
 		});
 		
 		this.map.scrollZoom.disable();
-		//this.map.dragPan.disable();
+		this.map.dragPan.disable();
 		 
 		 this.map.on('mousemove', function (event) {
               mouseLatLng = event.lngLat;
@@ -213,75 +150,47 @@ function Canvas(){
 	}
 	
 	Canvas.prototype.zoomIn = function(angle){
-<<<<<<< HEAD
 		if (!mazorManager.zoomAngle || mazorManager.zoomAngle <2.1 || angle > mazorManager.zoomAngle){
 			mazorManager.zoomAngle = angle+1;
 		}
 
-		if (angle < mazorManager.zoomAngle -5){
-			var zoomToAdd = (((mazorManager.zoomAngle-angle) *2)/30)/10;
-			var zoomFactor = Math.pow(2,zoomToAdd);
-			var devideFactor = 1/(1-(1/zoomFactor));
+		var zoomToAdd = 0.1;
+		var zoomFactor = Math.pow(2,zoomToAdd);
+		var devideFactor = 1/(1-(1/zoomFactor));
+		console.log(devideFactor);
 		
+		if (angle < mazorManager.zoomAngle -2){
 			var lat = (mazorManager.mazor.originLatLng.lat - this.getCenter().lat)/devideFactor;
 			var lng = (mazorManager.mazor.originLatLng.lng - this.getCenter().lng)/devideFactor;
 			var newZoom = this.map.getZoom()+zoomToAdd;
 			var newCenter = new mapboxgl.LngLat( this.getCenter().lng + lng, this.getCenter().lat + lat);
 			this.map.jumpTo({zoom: newZoom, center: newCenter});
-			//mazorManager.zoomAngle = angle;
-=======
-		//if (!zoomAngle || zoomAngle <30.1 || angle > zoomAngle){
-		//	zoomAngle = angle+1;
-		//}
-
-		//if (angle < zoomAngle -30){
-			var lat = (mazorManager.getMazorLatLng().lat() - this.map.getCenter().lat())/2;
-			var lng = (mazorManager.getMazorLatLng().lng() - this.map.getCenter().lng())/2;
-			this.map.setZoom(this.map.getZoom()+1);
-			this.panLatLng( this.map.getCenter().lat() + lat,this.map.getCenter().lng() + lng);
+			mazorManager.zoomAngle = angle;
 			
-		//	zoomAngle = angle;
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
-			
-		//}
+		}
 		
 	}
 	
 	Canvas.prototype.zoomOut = function(angle){
 	
-<<<<<<< HEAD
 		if (!mazorManager.zoomAngle|| mazorManager.zoomAngle >357.9 || angle < mazorManager.zoomAngle){
 			mazorManager.zoomAngle = angle-1;
 		}
-
-		if (angle > mazorManager.zoomAngle + 5){
-					
-			var zoomToSub = (((angle-mazorManager.zoomAngle) *2)/30)/10;
-			var zoomFactor = Math.pow(2,zoomToSub);
-			var multiplyFactor = -1 + Math.pow(2,zoomToSub);
 		
+		var zoomToAdd = 0.1
+		var zoomFactor = Math.pow(2,zoomToAdd);
+		var multiplyFactor = -1 + Math.pow(2,zoomToAdd);
+
+		if (angle > mazorManager.zoomAngle + 2){
 			var lat = (mazorManager.mazor.originLatLng.lat - this.getCenter().lat)*multiplyFactor;
 			var lng = (mazorManager.mazor.originLatLng.lng - this.getCenter().lng)*multiplyFactor;
 			//this.map.setZoom(this.map.getZoom()-zoomToAdd);
 			//this.panLatLng( this.getCenter().lat - lat,this.getCenter().lng - lng);
-			var newZoom = this.map.getZoom() -zoomToSub;
+			var newZoom = this.map.getZoom() -zoomToAdd;
 			var newCenter = new mapboxgl.LngLat( this.getCenter().lng - lng, this.getCenter().lat - lat);
 			this.map.jumpTo({zoom: newZoom, center: newCenter});
-			//mazorManager.zoomAngle =angle;
+			mazorManager.zoomAngle =angle;
 		}
-=======
-		//if (!zoomAngle|| zoomAngle >329.9 || angle < zoomAngle){
-		//	zoomAngle = angle-1;
-		//}
-
-	//	if (angle > zoomAngle + 30){
-			var lat = (mazorManager.getMazorLatLng().lat() - this.map.getCenter().lat());
-			var lng = (mazorManager.getMazorLatLng().lng() - this.map.getCenter().lng());
-			this.map.setZoom(this.map.getZoom()-1);
-			this.panLatLng( this.map.getCenter().lat() - lat,this.map.getCenter().lng() - lng);
-			//zoomAngle =angle;
-		//}
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 		
 	}
 	
@@ -377,9 +286,7 @@ function MazorManager(){
 	
 	//StateManagement
 	MazorManager.prototype.updatePosition = function(position){
-		
 		//console.log(string_of_enum(states,this.mazor.state));
-		//console.log(getState(this.mazor.state));
 		if(this.mazor.isDeActivated()){
 			this.mouse.clickToActivate();
 		} else if (this.mazor.isActivated()){
@@ -389,65 +296,20 @@ function MazorManager(){
 			this.checkToClosable(position)
 
 		} else if (this.mazor.isActivatedClosable()){
-<<<<<<< HEAD
 			clearTimeout(this.zoomTimer);	
 			clearTimeout(this.panTimer);	
 			clearTimeout(this.closeTimer);
-=======
-			clearTimeout(zoomTimer);	
-			clearTimeout(panTimer);	
-			clearTimeout(closeTimer);
-			clearInterval(zoomModeTimer);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 			this.checkActivatedClosable(position);
 		} else if (this.mazor.isZoomActivated()){
 
 			// newApproach
-<<<<<<< HEAD
 			clearTimeout(this.panTimer);	
 			clearTimeout(this.closeTimer);
-=======
-			clearTimeout(panTimer);		
-			clearTimeout(closeTimer);
-			//clearInterval(zoomModeTimer);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 				if (!this.checkToClose(position)){
 					if (this.checkToHighlightPan(position)){
 						this.checkPanActivated(position);
-					} else {
-						if (this.checkToActivateZoomMode(position)){ 
-							
-							this.setZoomInOut(position);
-							var t = this;
-							zoomModeTimer = window.setInterval(function(){t.setZoomInOut(position);},zoomModeInterval);
-							
-						} else {
-							//this.checkToEndZoomMode(position);
-						}
-					}
-				}
-		} else if (this.mazor.isZoomModePlusActivated()){
-			//Check if of icon
-			clearTimeout(panTimer);		
-			clearTimeout(closeTimer);
-			//clearInterval(zoomModeTimer);
-				if (!this.checkToClose(position)){
-					if (this.checkToHighlightPan(position)){
-						this.checkPanActivated(position);
-					} else {
-						this.checkToEndZoomPlusMode(position);
-					}
-				}
-		} else if (this.mazor.isZoomModeMinActivated()){
-			//Check if of icon
-			clearTimeout(panTimer);		
-			clearTimeout(closeTimer);
-			//clearInterval(zoomModeTimer);
-				if (!this.checkToClose(position)){
-					if (this.checkToHighlightPan(position)){
-						this.checkPanActivated(position);
-					} else {
-						this.checkToEndZoomMinMode(position);
+					} else {						
+						this.setZoomInOut(position);
 					}
 				}
 			
@@ -455,16 +317,9 @@ function MazorManager(){
 			this.mazor.activateFullPanMode();
 			
 		} else if (this.mazor.isFullPanModeActivated()){
-<<<<<<< HEAD
 			clearTimeout(this.closeTimer);
 			clearTimeout(this.zoomTimer);
 			clearInterval(this.panModeTimer);
-=======
-			clearTimeout(closeTimer);
-			clearTimeout(zoomTimer);
-			clearInterval(zoomModeTimer);
-			clearInterval(panModeTimer);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 			if (!this.cursorInPanArea(position)){
 				!this.checkToClose(position)
 			} 	
@@ -509,61 +364,20 @@ function MazorManager(){
 		}
 	}
 	
-<<<<<<< HEAD
 	MazorManager.prototype.checkToHighlightZoom = function(position){
 		if(this.mazor.getZoomIconPosition().calcDistance(position) < cursorBallRadius*3){
-=======
-/* 	MazorManager.prototype.checkToHighlightZoom = function(position){
-		if(this.mazor.zoomIcon.getRealPosition().calcDistance(position) < cursorBallRadius*3){
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 			this.mazor.highlightZoom();
 			return true;
 		} else {
 			this.mazor.showNormalZoom();	
 			return false;
 		}
-	} */
-	
-	MazorManager.prototype.checkToHighlightZoom = function(position){
-		//if(this.mazor.origin.calcDistance(position) < cursorBallRadius*3||this.mazor.ZoomIconPlus.getRealPosition().calcDistance(position) < cursorBallRadius*3){
-		if (this.cursorInZoomRing(position)) {
-			this.mazor.highlightZoom();
-			return true;
-		} else {
-			this.mazor.zoomIconMin.showNormal();
-			this.mazor.zoomIconPlus.showNormal();			
-			return false;
-		}
 	}
-	
 	
 	MazorManager.prototype.checkZoomActivated = function(position){
 			var t = this;
 			this.zoomTimer = window.setTimeout(function(){t.mazor.activateZoom(position);},iconTimeOutms);
 	}
-	
-	MazorManager.prototype.checkToEndZoomPlusMode = function(position){
-
-		if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) > cursorBallRadius *2){
-	//		console.log(position.calcDistance(this.mazor.zoomIconMin.origin));
-			//console.log('StopPlus');
-			clearInterval(zoomModeTimer);
-			this.mazor.activateZoom(position);
-			this.mazor.zoomIconPlus.notHighlightZoomIcon();
-		} 
-	}
-	
-	MazorManager.prototype.checkToEndZoomMinMode = function(position){
-
-		if (position.calcDistance(this.mazor.zoomIconMin.realPosition) > cursorBallRadius *2){
-//			console.log(position.calcDistance(this.mazor.zoomIconPlus.origin));
-			//console.log('StopMin');
-			clearInterval(zoomModeTimer);
-			this.mazor.activateZoom(position);
-			this.mazor.zoomIconMin.notHighlightZoomIcon();
-		} 
-	}
-	
 	
 	MazorManager.prototype.cursorInZoomRing= function(position){
 		var dist = this.mazor.origin.calcDistance(position);
@@ -574,71 +388,25 @@ function MazorManager(){
 		}
 	}
 	
-	MazorManager.prototype.checkToActivateZoomMode = function(position){
-		if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) < cursorBallRadius *2.5){
-			this.mazor.activateZoomModePlus();
-			return true;
-		} else if (position.calcDistance(this.mazor.zoomIconMin.realPosition) < cursorBallRadius *2.5){
-			this.mazor.activateZoomModeMin();
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
 	MazorManager.prototype.setZoomInOut = function(position){
 		//check position
-/* 		var angle = this.mazor.origin.calcAngle(position); ;
+		var angle = this.mazor.origin.calcAngle(position); ;
 		
 		if (angle> this.mazor.zoomDegrees){
-<<<<<<< HEAD
-			this.mazor.showPlus();
-=======
 			//set icon
-			//this.mazor.zoomIconPlus.showPlus();
+			this.mazor.showPlus();
 			zoomFactor = zoomFactor + zoomChange;
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 			this.canvas.zoomIn(getRealAngle(this.mazor.origin.calcAngle(position)));
 			
 		} else {
-<<<<<<< HEAD
 			this.mazor.showMin();
-			this.canvas.zoomOut(getRealAngle(this.mazor.origin.calcAngle(position)));	
-		}
-		
-		this.mazor.zoomDegrees = angle;
-=======
-			//this.mazor.zoomIcon.showMin();
 			this.canvas.zoomOut(getRealAngle(this.mazor.origin.calcAngle(position)));
 			//change zoomlevel
 			zoomFactor = zoomFactor - zoomChange;
-			//this.canvas.zoomCanvasOut(this.mazor.originLatLng);
-			//this.taskManager.addZoom(this.canvas.getZoom()-1);
 			
-		} */
-		if (position.calcDistance(this.mazor.zoomIconPlus.realPosition) < cursorBallRadius *2.5){
-			//console.log(position.calcDistance(this.mazor.zoomIconPlus.realPosition));
-			this.canvas.zoomIn();
-			//console.log(this.canvas.getZoom());
-		} else if (position.calcDistance(this.mazor.zoomIconMin.realPosition) < cursorBallRadius *2.5){
-			//console.log(position.calcDistance(this.mazor.zoomIconMin.realPosition));
-			this.canvas.zoomOut();
-		} else {
-			clearInterval(zoomModeTimer);
-			//this.mazor.deActivateZoomMode();
 		}
 		
-		
-		
-		
-		//var zoomFactor = this.mazor.zoomDegrees/angle ;
-		//zoomFactor = zoomFactor -1;
-		//zoomFactor = zoomFactor /10;
-		//zoomFactor = zoomFactor + 1;
-		//zoomFactor = 1;
-		
-		//this.mazor.zoomDegrees = angle;
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
+		this.mazor.zoomDegrees = angle;
 	}
 	
 	MazorManager.prototype.checkToHighlightPan = function(position){
@@ -774,12 +542,6 @@ function MazorManager(){
 		}
 	}
 	
-	MazorManager.prototype.ratherMazor = function(){
-		if (this.taskManager) {
-			this.taskManager.ratherMazor();
-		}
-	}
-	
 	MazorManager.prototype.failed = function(){
 		if (this.taskManager) {
 			this.taskManager.failed();
@@ -791,23 +553,17 @@ function MazorManager(){
 		this.start = false; 
 		this.mazor.hideAll(this.mazor.origin);
 		this.canvas.normalMode();
-	//REMINDER	document.addEventListener('click', onMouseClick, false);
+		document.addEventListener('click', onMouseClick, false);
 	}
 	
 	MazorManager.prototype.deActivateMazor = function(position){
 		this.mazor.deActivateMazor(position);
-<<<<<<< HEAD
 		clearInterval(this.panModeTimer);
-=======
-		clearInterval(panModeTimer);
-		clearInterval(zoomModeTimer);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 		if (disable) {
 			this.mazor.hideAll(this.mazor.origin);
 		}
 	}
 	
-<<<<<<< HEAD
 	MazorManager.prototype.getState = function(){
 		return this.mazor.state;
 	}
@@ -826,17 +582,7 @@ function MazorManager(){
 
 	MazorManager.prototype.panTo= function(location){
 		this.canvas.panTo(location);
-	}	
-
-	MazorManager.prototype.isMazorDeActivated = function(){
-		return (this.mazor.state == mazorManager.states.DEACTIVATED);
-	}	
-=======
-	MazorManager.prototype.isMazorDeActived = function(){
-		return this.mazor.isDeActivated();
-	}
-	
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
+	}		
 	
 	MazorManager.prototype.zoom= function(zoomFactor){
 		this.canvas.zoom(zoomFactor);
@@ -853,8 +599,7 @@ function Mazor(){
 	this.outerCircle = new OuterCircle();
 	this.close = new Close();
 	this.panIcon = new PanIcon();
-	this.zoomIconMin = new ZoomIconMin();
-	this.zoomIconPlus = new ZoomIconPlus();
+	this.zoomIcon = new ZoomIcon();
 	this.panLine = new PanLine();
 	this.zoomDegrees;
 }
@@ -863,17 +608,13 @@ function Mazor(){
 	Mazor.prototype.updatePosition = function(position){
 		if (this.isDeActivated()){
 			this.origin = position;
-			this.MazorDeActivated.updatePositionAll(position);
+			this.MazorDeActivated.updatePosition(position);
 		} else {
 			this.cursorBall.updatePosition(position);
 			this.innerCircle.rotate(this.origin.calcAngle(position)+180);
 			this.outerCircle.rotate(this.origin.calcAngle(position)+180);
 			this.panIcon.rotateIcon(this.origin.calcAngle(position));
-			
-			if(!this.isZoomActivated()&&!this.isZoomModePlusActivated()&&!this.isZoomModeMinActivated()){	
-				this.zoomIconPlus.rotateIcon(this.origin.calcAngle(position)+zoomIconPlusAngle);
-				this.zoomIconMin.rotateIcon(this.origin.calcAngle(position)-zoomIconMinAngle);
-			}
+			this.zoomIcon.rotateIcon(this.origin.calcAngle(position));
 			if (this.isFullPanModeActivated){
 				this.panLine.drawLine(this.origin,position);
 			}
@@ -881,27 +622,16 @@ function Mazor(){
 	}
 
 	Mazor.prototype.init = function(){
-<<<<<<< HEAD
 		this.setState(mazorManager.states.DEACTIVATED);
-=======
-		this.setState(states.DEACTIVATED);
-		this.zoomIconMin.hideAll();
-		this.zoomIconPlus.hideAll();
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 		if (!disable){
-			this.MazorDeActivated.showAll();
+			this.MazorDeActivated.show();
 		}
 	}
 	
 	Mazor.prototype.activateMazor = function(){
 		this.originLatLng = mouseLatLng;
-<<<<<<< HEAD
 		this.setState(mazorManager.states.ACTIVATED);
 		this.MazorDeActivated.hide();
-=======
-		this.setState(states.ACTIVATED);
-		this.MazorDeActivated.hideAll();
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 		this.cursorBall.showNormal();
 		this.cursorBall.setPosition(this.origin);
 		this.innerCircle.show();
@@ -911,14 +641,10 @@ function Mazor(){
 		this.showBlue();
 		this.close.show();
 		this.close.setPosition(this.origin);
-		this.zoomIconMin.showNormal();
-		this.zoomIconMin.offset = zoomIconOffset;
-		this.zoomIconMin.setPosition(this.origin);
-		this.zoomIconMin.rotateIcon(-90-zoomIconMinAngle);
-		this.zoomIconPlus.showNormal();
-		this.zoomIconPlus.offset = zoomIconOffset;
-		this.zoomIconPlus.setPosition(this.origin);
-		this.zoomIconPlus.rotateIcon(-90+zoomIconPlusAngle);
+		this.zoomIcon.showNormal();
+		this.zoomIcon.offset = zoomIconOffset;
+		this.zoomIcon.setPosition(this.origin);
+		this.zoomIcon.rotateIcon(-90);
 		this.panIcon.showNormal();
 		this.panIcon.offset = panIconOffset;
 		this.panIcon.setPosition(this.origin);
@@ -930,41 +656,23 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.activateZoom = function(position){
-<<<<<<< HEAD
-		
+		mazorManager.zoomAngle = null;
 		this.setState(mazorManager.states.ZOOMACTIVATED);
 		this.zoomIcon.highlightZoom();		
 		this.zoomIcon.showTwoWay();
-=======
-		zoomAngle = null;
-		this.setState(states.ZOOMACTIVATED);
-		this.zoomIconMin.highlightZoom();		
-		this.zoomIconPlus.highlightZoom();
-		//this.zoomIconMin.showTwoWay();
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 		this.zoomDegrees = this.origin.calcAngle(position);
-		mazorManager.zoomAngle = getRealAngle(this.zoomDegrees);
 		// extra stuff for if you come from panmode
 		this.panIcon.showNormal();
 		this.panIcon.rotateIcon(this.origin.calcAngle(position));
 		this.cursorBall.showNormal();
 		this.cursorBall.updatePosition(position);
 		this.showPurple();
-	
 	}
-	
-
 	
 	Mazor.prototype.deActivateZoom = function(position){
-		this.zoomIconMin.showNormal();
-		this.zoomIconMin.rotateIcon(this.origin.calcAngle(position)-zoomIconMinAngle);
-		this.zoomIconPlus.showNormal();
-		this.zoomIconPlus.rotateIcon(this.origin.calcAngle(position)+zoomIconPlusAngle);
+		this.zoomIcon.showNormal();
+		this.zoomIcon.rotateIcon(this.origin.calcAngle(position));
 		this.showBlue();
-	}
-	
-	Mazor.prototype.deActivateZoomMode = function(position){
-		
 	}
 	
 	Mazor.prototype.activatePan = function(position){
@@ -982,17 +690,10 @@ function Mazor(){
 		this.panLine.hideAll();
 		
 	}
-
 	
 	Mazor.prototype.activateFullPanMode = function(position){
-<<<<<<< HEAD
 		this.zoomIcon.hideAll();
 		this.setState(mazorManager.states.FULLPANMODEACTIVATED);		
-=======
-		this.zoomIconMin.hideAll();
-		this.zoomIconPlus.hideAll();
-		this.setState(states.FULLPANMODEACTIVATED);		
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 		this.showGreen();
 		this.panLine.showAll();
 	}
@@ -1005,33 +706,25 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.deActivateMazor = function(position){
-<<<<<<< HEAD
 		this.setState(mazorManager.states.DEACTIVATED);
 		this.MazorDeActivated.show();
-=======
-		this.setState(states.DEACTIVATED);
-		this.MazorDeActivated.showAll();
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 		this.cursorBall.hide();
 		this.innerCircle.hide();
 		this.outerCircle.hide();
 		this.close.hide();
 		this.panIcon.hideAll();
 		this.panLine.hideAll();
-		this.zoomIconMin.hideAll();
-		this.zoomIconPlus.hideAll();
+		this.zoomIcon.hideAll();
 		this.updatePosition(this.origin);
 	}
 	
 	Mazor.prototype.highlightZoom = function(){
-			this.zoomIconMin.highlightZoom();
-			this.zoomIconPlus.highlightZoom();
+			this.zoomIcon.highlightZoom();
 			this.notHighlightPan();
 	}
 	
 	Mazor.prototype.notHighlightZoom = function(){
-			this.zoomIconMin.notHighlightZoom();
-			this.zoomIconPlus.notHighlightZoom();
+			this.zoomIcon.notHighlightZoom();
 	}
 
 	Mazor.prototype.highlightPan = function(){
@@ -1040,16 +733,6 @@ function Mazor(){
 	
 	Mazor.prototype.notHighlightPan = function(){
 			this.panIcon.notHighlightPan();
-	}
-	
-	Mazor.prototype.activateZoomModeMin = function(position){
-		this.zoomIconMin.highlightZoomIcon();
-		this.setState(states.ZOOMMODEMIN);
-	}
-	
-	Mazor.prototype.activateZoomModePlus = function(position){
-		this.zoomIconPlus.highlightZoomIcon();
-		this.setState(states.ZOOMMODEPLUS);
 	}
 	
 	Mazor.prototype.showPurple = function(position){
@@ -1076,18 +759,6 @@ function Mazor(){
 		return (this.state == mazorManager.states.DEACTIVATED);
 	}	
 	
-	Mazor.prototype.isZoomModeMinActivated = function(){
-		return (this.state == states.ZOOMMODEMIN);
-	}
-	
-	Mazor.prototype.isZoomModeActivated = function(){
-		return (this.state == states.ZOOMMODE);
-	}	
-
-	Mazor.prototype.isZoomModePlusActivated = function(){
-		return (this.state == states.ZOOMMODEPLUS);
-	}		
-
 	Mazor.prototype.isZoomActivated = function(){
 		return (this.state == mazorManager.states.ZOOMACTIVATED);
 	}	
@@ -1122,13 +793,8 @@ function Mazor(){
 
 	Mazor.prototype.hideAll	 = function(){
 		this.deActivateMazor();
-<<<<<<< HEAD
 		this.MazorDeActivated.hide();
 	}
-=======
-		this.MazorDeActivated.hideAll();
-		
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 
 	Mazor.prototype.getZoomIconPosition	 = function(){
 		return this.zoomIcon.getRealPosition();
@@ -1237,34 +903,7 @@ function InnerCircle(){
 MazorDeActivated.prototype = new Element();
 function MazorDeActivated(){
 	this.setDiv('MazorDeActivated');	
-	//this.startText = new StartText();
-	this.showText = false
 }
-
-	MazorDeActivated.prototype.showAll = function(){
-		this.show();
-		//if (!this.showText) {
-		//	this.startText.show();
-		//}
-		//this.showText = true;
-	}
-	
-	MazorDeActivated.prototype.hideAll = function(){
-		this.hide();
-		//this.startText.hide();
-		document.getElementById('Task').style.setProperty('visibility', 'visible');
-	}
-	
-	MazorDeActivated.prototype.updatePositionAll = function(position){
-		this.updatePosition(position);
-		//this.startText.updatePosition(position);
-	}
-
-StartText.prototype = new Element();
-function StartText(){
-	this.setDiv('ActivateText');	
-}
-
 
 OuterCircle.prototype = new Element();
 function OuterCircle(){
@@ -1314,154 +953,83 @@ function PanIconImage(){
 	this.setDiv('PanIconImage');
 }
 
-ZoomIconMin.prototype = new Element();
-function ZoomIconMin(){
-	this.setDiv('MagnifyingGlassMin');
-	//this.zoomHolder = new ZoomHolder();
-	this.activatedZoomImageMin = new ActivatedZoomImageMin();
-	this.activatedZoomImageMin.showNormal();
+ZoomIcon.prototype = new Element();
+function ZoomIcon(){
+	this.setDiv('MagnifyingGlass');
+	this.zoomHolder = new ZoomHolder();
+	this.activatedZoomImage = new ActivatedZoomImage();
 }
 
-ZoomIconMin.prototype.showNormal = function(){
+ZoomIcon.prototype.showNormal = function(){
 	this.show();
-	//this.zoomHolder.show();
-	//this.zoomHolder.showHolderOblique();
-	this.activatedZoomImageMin.showNormal();
+	this.zoomHolder.show();
+	this.zoomHolder.showHolderOblique();
+	this.activatedZoomImage.hide();
 	this.notHighlightZoom();
 }
 
-ZoomIconMin.prototype.hideAll = function(){
+ZoomIcon.prototype.hideAll = function(){
 	this.hide();
-	//this.zoomHolder.hide();
-	this.activatedZoomImageMin.hideAll();
-	//this.notHighlightZoom();
+	this.zoomHolder.hide();
+	this.activatedZoomImage.hide();
+	this.notHighlightZoom();
 }
 
-/* ZoomIconMin.prototype.showTwoWay = function(){
+ZoomIcon.prototype.showTwoWay = function(){
 	this.zoomHolder.showHolderStraight();
 	this.activatedZoomImage.showTwoWay();
 }
 
-ZoomIconMin.prototype.showPlus = function(){
+ZoomIcon.prototype.showPlus = function(){
 	this.activatedZoomImage.showPlus();
 }
 
-ZoomIconMin.prototype.showMin = function(){
+ZoomIcon.prototype.showMin = function(){
 	this.activatedZoomImage.showMin();
-} */
+}
 
-ZoomIconMin.prototype.highlightZoom = function(){
+ZoomIcon.prototype.highlightZoom = function(){
 	document.documentElement.style.setProperty('--ZoomColor', 'var(--purple-color)');
-}
-
-ZoomIconMin.prototype.notHighlightZoom = function(){
-	document.documentElement.style.setProperty('--ZoomColor', 'var(--blue-color)');
-}
-
-ZoomIconMin.prototype.highlightZoomIcon = function(){
 	document.documentElement.style.setProperty('--ZoomFillColor', 'var(--lightPurple-color)');
 }
 
-ZoomIconMin.prototype.notHighlightZoomIcon = function(){
-	document.documentElement.style.setProperty('--ZoomFillColor', 'var(--white-color)');
-}
-
-ZoomIconPlus.prototype = new Element();
-function ZoomIconPlus(){
-	this.setDiv('MagnifyingGlassPlus');
-	//this.zoomHolder = new ZoomHolder();
-	this.activatedZoomImagePlus = new ActivatedZoomImagePlus();
-	this.activatedZoomImagePlus.showNormal();
-}
-
-ZoomIconPlus.prototype.showNormal = function(){
-	this.show();
-	//this.zoomHolder.show();
-	//this.zoomHolder.showHolderOblique();
-	this.activatedZoomImagePlus.showNormal();
-	this.notHighlightZoom();
-}
-
-ZoomIconPlus.prototype.hideAll = function(){
-	this.hide();
-	//this.zoomHolder.hide();
-	this.activatedZoomImagePlus.hideAll();
-	//this.notHighlightZoom();
-}
-
-/* ZoomIconPlus.prototype.showTwoWay = function(){
-	this.zoomHolder.showHolderStraight();
-	this.activatedZoomImage.showTwoWay();
-}
-
-ZoomIconPlus.prototype.showPlus = function(){
-	this.activatedZoomImage.showPlus();
-}
-
-ZoomIconPlus.prototype.showMin = function(){
-	this.activatedZoomImage.showMin();
-} */
-
-ZoomIconPlus.prototype.highlightZoom = function(){
-	document.documentElement.style.setProperty('--ZoomColor', 'var(--purple-color)');
-}
-
-ZoomIconPlus.prototype.notHighlightZoom = function(){
+ZoomIcon.prototype.notHighlightZoom = function(){
+	
 	document.documentElement.style.setProperty('--ZoomColor', 'var(--blue-color)');
-}
-
-ZoomIconPlus.prototype.highlightZoomIcon = function(){
-	document.documentElement.style.setProperty('--ZoomFillColor', 'var(--lightPurple-color)');
-}
-
-ZoomIconPlus.prototype.notHighlightZoomIcon = function(){
 	document.documentElement.style.setProperty('--ZoomFillColor', 'var(--white-color)');
 }
 
 
-ActivatedZoomImageMin.prototype = new Element();
-function ActivatedZoomImageMin(){
-	this.setDiv('ActivatedZoomImageMin');
-	this.activatedZoomImageMin1515 = new ActivatedZoomImageMin1515();
+ActivatedZoomImage.prototype = new Element();
+function ActivatedZoomImage(){
+	this.setDiv('ActivatedZoomImage');
 }
 
-ActivatedZoomImageMin.prototype.hideAll = function(){
-	this.hide();
-	this.activatedZoomImageMin1515.hide();
-}
-
-ActivatedZoomImageMin.prototype.showNormal = function(){
+ActivatedZoomImage.prototype.showTwoWay = function(){
 	this.show();
-	this.activatedZoomImageMin1515.show();
+	document.getElementById('ActivatedZoomImage1515').setAttribute("src","TwoWayIcon.png");
 }
 
-ActivatedZoomImagePlus.prototype = new Element();
-function ActivatedZoomImagePlus(){
-	this.setDiv('ActivatedZoomImagePlus');
-	this.activatedZoomImagePlus1515 = new ActivatedZoomImagePlus1515();
+ActivatedZoomImage.prototype.showPlus = function(){
+	document.getElementById('ActivatedZoomImage1515').setAttribute("src","PlusIcon.png");
 }
 
-ActivatedZoomImagePlus.prototype.hideAll = function(){
-	this.hide();
-	this.activatedZoomImagePlus1515.hide();
+ActivatedZoomImage.prototype.showMin = function(){
+	document.getElementById('ActivatedZoomImage1515').setAttribute("src","MinIcon.png");
 }
 
-ActivatedZoomImagePlus.prototype.showNormal = function(){
-	this.show();
-	this.activatedZoomImagePlus1515.show();
+ZoomHolder.prototype = new Element();
+function ZoomHolder(){
+	this.setDiv('ZoomHolder');
 }
 
-
-ActivatedZoomImageMin1515.prototype = new Element();
-function ActivatedZoomImageMin1515(){
-	this.setDiv('ActivatedZoomMinImage1515');
+ZoomHolder.prototype.showHolderOblique = function(){
+	this.div.className = "default Icon ZoomHolderOblique";
 }
 
-ActivatedZoomImagePlus1515.prototype = new Element();
-function ActivatedZoomImagePlus1515(){
-	this.setDiv('ActivatedZoomPlusImage1515');
+ZoomHolder.prototype.showHolderStraight = function(){
+	this.div.className = "default Icon ZoomHolderStraight";
 }
-
 
 PanLine.prototype = new Element();
 function PanLine(){
@@ -1548,12 +1116,12 @@ function TaskButton(taskmanager){
 }
 	
 	TaskButton.prototype.showStartText = function(text){
-		//document.documentElement.style.setProperty('--TextButtonColor', 'var(--green-color)');
+		document.documentElement.style.setProperty('--TextButtonColor', 'var(--green-color)');
 		this.textDiv.innerHTML = text;
 	}
 	
 	TaskButton.prototype.showStopText = function(text){
-		//document.documentElement.style.setProperty('--TextButtonColor', 'red');
+		document.documentElement.style.setProperty('--TextButtonColor', 'red');
 		this.textDiv.innerHTML = text;
 	}
 	
@@ -1573,7 +1141,6 @@ function TaskManager(){
 	this.userId = Date.now();
 	this.tasks = new Set();
 	this.activeTask = new Practice(this.userId,0);
-	this.activeTask.isDone = true;
 	this.taskButton = new TaskButton(this);
 }
 
@@ -1615,16 +1182,10 @@ function TaskManager(){
 	
 	TaskManager.prototype.getTaskData = function(){
 		//assamble data, create csv format.  
-<<<<<<< HEAD
 		var data = "UserId;TaskNumber;StartTime;TotalTime;Clicks;Movement;Wheel;Result" + "<br>"
 	
-=======
-		var data = "UserId;TaskNumber;StartTime;TotalTime;Clicks;Movement;Wheel;Result;Opinion" + "<br>"
-
-		
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 		for(let task of this.tasks){
-			data = data + task.userId + ";" +task.number+ ";" +task.startTime+ ";" +task.totalTime+ ";" +task.clicks+ ";" +task.movement + ";" +task.wheel + ";" +task.result +";" +task.opinion +"<br>";
+			data = data + task.userId + ";" +task.number+ ";" +task.startTime+ ";" +task.totalTime+ ";" +task.clicks+ ";" +task.movement + ";" +task.wheel + ";" +task.result +"<br>";
 		}			
 		return data;
 	}
@@ -1639,7 +1200,6 @@ function TaskManager(){
 	}
 	
 	TaskManager.prototype.taskButtonClicked = function(){
-<<<<<<< HEAD
 		this.activeTask.stop();
 		this.activeTask = this.newTask();
 		this.activeTask.start();
@@ -1647,23 +1207,6 @@ function TaskManager(){
 		this.taskButton.hide();
 		var t = this;
 		window.setTimeout(function(){t.taskButton.show();},400);
-=======
-		
-		//stop the task, show next buttons
-		if (!this.activeTask.isDone){
-			this.activeTask.stop();
-			this.taskButton.showStopText(this.activeTask.stopText);
-		} else {
-			this.activeTask.isDone = true;
-			this.activeTask = this.newTask();
-			this.activeTask.start();
-			this.taskButton.showStartText(this.activeTask.startText);
-			this.taskButton.hide();
-			var t = this;
-			window.setTimeout(function(){t.taskButton.show();},400);
-		}
-
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 	}
 	
 	TaskManager.prototype.addState = function(state){
@@ -1700,11 +1243,6 @@ function TaskManager(){
 		this.taskButtonClicked();
 	}
 	
-	TaskManager.prototype.ratherMazor = function(){
-		this.activeTask.ratherMazor();
-		this.taskButtonClicked();
-	}
-	
 	TaskManager.prototype.failed = function(){
 		this.activeTask.failed();
 		this.taskButtonClicked();
@@ -1721,18 +1259,14 @@ function Task(taskUserId, taskId){
 	this.totalTime=0;
 	this.wheel=0;
 	this.statusLog="";
-	this.isDone=false;
+	this.isDone;
 	this.startText;
 	this.stopText;
 	this.started = false;
 	this.result = "";
-<<<<<<< HEAD
 	this.buttons= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met een gewone muis was het sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
 	this.buttonsMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor was het sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
 
-=======
-	this.opinion = "";
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 
 }
 
@@ -1783,11 +1317,7 @@ function Task(taskUserId, taskId){
 	}
 	
 	Task.prototype.ratherMouse = function(){
-	    this.opinion= "ratherMouse";
-	}
-	
-	Task.prototype.ratherMazor = function(){
-	    this.opinion= "ratherMazor";
+	    this.result= "ratherMouse";
 	}
 		
 	Task.prototype.failed = function(){
@@ -1804,13 +1334,9 @@ function getState(state){
 			return "ACTIVATEDCLOSABLE";
 		case 4:
 			return "ZOOMACTIVATED";
-		case 6:
-			return "ZOOMMODEPLUS";
-		case 7:
-			return "ZOOMMODEMIN";
-		case 8:
+		case 5:
 			return "PANACTIVATED";
-		case 9:
+		case 6:
 			return "FULLPANMODEACTIVATED";
 	}				
 }
@@ -1827,15 +1353,9 @@ Task1.prototype = new Task();
 function Task1(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-<<<<<<< HEAD
 	this.startText = "Klik hier om te starten met taak 1: <BR> zoek Amsterdam Centraal";
 	this.stopText = "Taak 1: zoek Amsterdam Centraal<br>" + this.buttons;
 	this.location = new mapboxgl.LngLat(5.39524,52.28958);
-=======
-	this.startText = "Taak 1: zoek Amsterdam Centraal<br>" + buttons;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
-	this.location = new google.maps.LatLng(52.28958, 5.39524);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 	this.zoomFactor = 8;
 	
 }
@@ -1844,15 +1364,9 @@ Task2.prototype = new Task();
 function Task2(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-<<<<<<< HEAD
 	this.startText = "Klik hier om te starten met taak 2: <BR> zoek een ziekenhuis in Leeuwarden";
 	this.stopText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + this.buttons;
 	this.location = new mapboxgl.LngLat(5.792486,53.196635);
-=======
-	this.startText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + buttons;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
-	this.location = new google.maps.LatLng(53.196635, 5.792486);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 	this.zoomFactor = 19;
 	
 }
@@ -1861,15 +1375,9 @@ Task3.prototype = new Task();
 function Task3(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-<<<<<<< HEAD
 	this.startText = "Klik hier om te starten met taak 3: <BR> zoek een plek om eten te kopen langs de A31";
 	this.stopText = "Taak 3: zoek een plek om eten te kopen langs de A31<br>" + this.buttons;
 	this.location = new mapboxgl.LngLat(7.305221,53.368559);
-=======
-	this.startText = "Taak 3: zoek een plek om eten te kopen langs de A31<br>" + buttons;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMouse;
-	this.location = new google.maps.LatLng(53.368559, 7.305221);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 	this.zoomFactor = 16;
 	
 }
@@ -1878,13 +1386,8 @@ Task4.prototype = new Task();
 function Task4(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-<<<<<<< HEAD
 	this.startText = "Klik hier om te starten met taak 4: <BR> zoek Amsterdam Centraal";
 	this.stopText = "Nu gewoon met MUIS en ZOOMEN rechtsonder <BR> Taak 4: zoek Rotterdam Centraal<br>" + this.buttonsMazor;
-=======
-	this.startText = "Nu gewoon met MUIS en ZOOMEN rechtsonder <BR> Taak 4: zoek Rotterdam Centraal<br>" + buttonsMazor;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 	this.location = new google.maps.LatLng(52.28958, 5.39524);
 	this.zoomFactor = 8;
 	
@@ -1894,15 +1397,9 @@ Task5.prototype = new Task();
 function Task5(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-<<<<<<< HEAD
 	this.startText = "Klik hier om te starten met taak 5: <BR> zoek een ziekenhuis in Leeuwarden";
 	this.stopText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + this.buttonsMazor;
 	this.location = new mapboxgl.LngLat(5.695795,50.849093);
-=======
-	this.startText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + buttonsMazor;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
-	this.location = new google.maps.LatLng(50.849093, 5.695795);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 	this.zoomFactor = 19;
 	
 }
@@ -1911,15 +1408,9 @@ Task6.prototype = new Task();
 function Task6(taskUserId, taskId){
 	this.userId = taskUserId;
 	this.number = taskId;
-<<<<<<< HEAD
 	this.startText = "Klik hier om te starten met taak 3: <BR> zoek een plek om eten te kopen langs de A44";
 	this.stopText = "Taak 6: zoek een plek om eten te kopen langs de A44<br>" + this.buttonsMazor;
 	this.location = new mapboxgl.LngLat(8.676892,51.589606);
-=======
-	this.startText = "Taak 6: zoek een plek om eten te kopen langs de A44<br>" + buttonsMazor;
-	this.stopText = "Wat vond je er van?<BR>" + buttonEasyMazor;
-	this.location = new google.maps.LatLng(51.589606, 8.676892);
->>>>>>> 41d58c9ef2b6b069452bbcbc0d5001e9eb6a1cbc
 	this.zoomFactor = 16;
 	
 }

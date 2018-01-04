@@ -1,6 +1,5 @@
 // Date: 2017
 // Auteur:Corjan van Uffelen
-var disable=false;
 var mazorManager;
 var timer;
 var closeTimer;
@@ -13,20 +12,17 @@ var previousPosition;
 var mouseDifLat;
 var mouseDifLng;
 var zoomAngle;
-var start=true;
-var buttons= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met een gewone muis was het sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
-var buttonsMazor= "<div class='spacer'></div><div class='Button' onclick='mazorManager.success()'>Het is me gelukt</div><div class='spacer'></div><div class='Button' onclick='mazorManager.ratherMouse()'>Met de Mazor was het denk ik sneller gegaan</div><div class='spacer'></div><div onclick='mazorManager.failed()' class='Button' >Het is me niet gelukt</div>"
 
 //settings
 var timeOutms = 400;
-var iconTimeOutms = 20;
+var iconTimeOutms = 200;
 var cursorBallRadius = 4.5; 
 var closeRadius = 70;
 var panIconOffset = 57;
 var zoomIconOffset = 36;
 var fullPanModeRadius = 70;
 var zoomFactor = 100;
-var zoomLevel = 6;
+var zoomLevel = 8;
 var zoomChange = 2;
 var maxPanDistance = 170;
 var panInterval = 10;
@@ -45,19 +41,9 @@ function Mouse(){
 
 }
 
-
 	// To show mazor on first move
 	Mouse.prototype.init = function(){
 		document.addEventListener('mousemove', onMouseUpdateInit, false);
-		if (disable) {
-			document.addEventListener('click', onMouseClickDisabled, false);
-			document.addEventListener('wheel', onWheel, false);
-		}	
-	}
-	
-	Mouse.prototype.clickToActivate = function(){
-		document.addEventListener('click', onMouseClick, false);
-		document.addEventListener('wheel', onWheel, false);
 	}
 
 	// To show mazor on first move
@@ -70,49 +56,15 @@ function Mouse(){
 
 	// For the rest of the moving
 	function onMouseUpdate(e) {
-		//var position = setPosition(new Point(e.pageX,e.pageY));
-		if (!inButtonArea(e.pageX,e.pageY)) {
-			var position= new Point(e.pageX, e.pageY);
-			var oldLat = mazorManager.point2LatLng(position);
-			mouseDifLat = oldLat.lat() - mazorManager.point2LatLng(previousPosition).lat();
-			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
-			mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
-			if (!disable){
-				mazorManager.updatePosition(position);
-			}
-			mazorManager.addMovement(position.calcDistance(previousPosition));
-			previousPosition = position;
-		} else {
-			if (mazorManager.mazor.state != states.DEACTIVATED) {
-				mazorManager.deActivateMazor(position);
-			}
-		}
+		position = new Point(e.pageX,e.pageY);
+		var oldLat = mazorManager.point2LatLng(position);
+		mouseDifLat = oldLat.lat() - mazorManager.point2LatLng(previousPosition).lat();
+		mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
+		mouseDifLng = mazorManager.point2LatLng(position).lng() - mazorManager.point2LatLng(previousPosition).lng();
+		mazorManager.updatePosition(position);
+		previousPosition = position;
 	}
 
-		// For the rest of the moving
-	function onMouseClick(e) {
-		mazorManager.addClick();
-		if (!inButtonArea(e.pageX,e.pageY) && start){
-			var position = new Point(e.pageX,e.pageY);
-			mazorManager.checkToActivate(position);
-			document.removeEventListener('click', onMouseClick, false);
-		}
-	}
-	
-	function onMouseClickDisabled(e) {
-		mazorManager.addClick();
-	}
-	
-	function onWheel(e) {
-		mazorManager.addWheel();
-	}
-	
-	function inButtonArea(x,y){
-		if (x <425 && y < 225) {
-			return true;
-		}
-	}
-	
 //View Class
 function Canvas(){
 	this.map;
@@ -129,15 +81,14 @@ function Canvas(){
 
 	//set Height of Canvas
 	Canvas.prototype.loadMaps = function(){
-		var latLng = new google.maps.LatLng(-5.046043, 118.245270);
+		var latLng = new google.maps.LatLng(52.28958, 5.39524);
 
 		this.map = new google.maps.Map(document.getElementById('Canvas'), {
-		scrollwheel: false,
 		zoom: zoomLevel,
 		center: latLng,
 		mapTypeId: google.maps.MapTypeId.ROADMAP,
-		gestureHandling: this.getGestureHandling(),
-		zoomControl: disable
+		gestureHandling: 'none',
+		//zoomControl: false
 		});
 		
 		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
@@ -146,35 +97,7 @@ function Canvas(){
 			//  mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
 
           });
-		  
-		  		//lastMousePosition = new google.maps.LatLng(52.28958, 5.39524);
-		this.map.addListener('zoom_changed', function (event) {
-              mazorManager.addZoom(this.getZoom());
-			//  mouseLatLng = new google.maps.LatLng(52.28958, 5.39524);
-
-          });
-		  
-		  
 	}
-	
-	Canvas.prototype.normalMode = function(){
-		this.map.setOptions({  zoomControl: true  });
-		this.map.setOptions({  gestureHandling: 'auto'  });
-	}
-	
-	Canvas.prototype.mazorMode = function(){
-		this.map.setOptions({  zoomControl: false  });
-		this.map.setOptions({  gestureHandling: 'none'  });
-	}
-	
-	Canvas.prototype.getGestureHandling = function(){
-		if (disable) {
-			return 'auto';
-		} else {
-			return 'none';
-		}
-	}
-	
 
 	Canvas.prototype.zoomIn = function(angle){
 		if (!zoomAngle || zoomAngle <30.1 || angle > zoomAngle){
@@ -244,16 +167,7 @@ function Canvas(){
 	Canvas.prototype.getCenter = function(){
 		return this.map.getCenter();
 	}
-	
-	Canvas.prototype.setCenter = function(newCenter){
-		this.map.setCenter = newCenter;
-	}
 
-	Canvas.prototype.getZoom = function(){
-		return this.map.getZoom();
-	}
-	
-	
 	Canvas.prototype.latLng2Point = function(latLng){
 		var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
 		var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
@@ -278,7 +192,6 @@ function MazorManager(){
 	this.mouse = new Mouse();
 	this.mouse.init();
 	this.lastPosition;
-	this.taskManager = new TaskManager();
 }
 
 	MazorManager.prototype.init = function(position){
@@ -297,8 +210,7 @@ function MazorManager(){
 	MazorManager.prototype.updatePosition = function(position){
 		//console.log(string_of_enum(states,this.mazor.state));
 		if(this.mazor.isDeActivated()){
-			this.mouse.clickToActivate();
-			//this.checkToActivate(position);
+			this.checkToActivate(position);
 			//If so you will leave this function and will come into the isActivated part
 		} else if (this.mazor.isActivated()){
 			
@@ -346,15 +258,15 @@ function MazorManager(){
 				}
 			
 		} else if (this.mazor.isPanActivated()){
-			this.mazor.activateFullPanMode();
-			//if(!this.checkDeActivatePan(position)){
-			//	this.checkFullPanModeActivated(position);
-			//} else {
-			//	// change the state to ACTIVATEDCLOSABLE en then do the checks that belong to that state.
-			//	this.mazor.deActivatePan();
-			//	this.mazor.activateMazorClosable();
-			//	this.checkActivatedClosable(position);
-			//}
+			
+			if(!this.checkDeActivatePan(position)){
+				this.checkFullPanModeActivated(position);
+			} else {
+				// change the state to ACTIVATEDCLOSABLE en then do the checks that belong to that state.
+				this.mazor.deActivatePan();
+				this.mazor.activateMazorClosable();
+				this.checkActivatedClosable(position);
+			}
 			
 		} else if (this.mazor.isFullPanModeActivated()){
 			clearTimeout(closeTimer);
@@ -378,14 +290,12 @@ function MazorManager(){
 		}
 		this.mazor.updatePosition(position);
 		
-		
 	}
 
 	MazorManager.prototype.checkToActivate = function(position){
-	//	clearTimeout(timer);
-	//	var t = this;
-	//	timer = window.setTimeout(function(){t.mazor.activateMazor();},timeOutms);
-	 	this.mazor.activateMazor(position);
+		clearTimeout(timer);
+		var t = this;
+		timer = window.setTimeout(function(){t.mazor.activateMazor();},timeOutms);
 	}
 
 	// this state can only be reached if the mazor is just activated.
@@ -455,7 +365,6 @@ function MazorManager(){
 			this.mazor.zoomIcon.showPlus();
 			zoomFactor = zoomFactor + zoomChange;
 			this.canvas.zoomIn(getRealAngle(this.mazor.origin.calcAngle(position)));
-			//this.taskManager.addZoom(this.canvas.getZoom()+1);
 			//this.canvas.zoomCanvasIn(this.mazor.originLatLng);
 			//change zoomlevel
 			//var zoomFactor = angle/this.mazor.zoomDegrees ;
@@ -466,7 +375,6 @@ function MazorManager(){
 			//change zoomlevel
 			zoomFactor = zoomFactor - zoomChange;
 			//this.canvas.zoomCanvasOut(this.mazor.originLatLng);
-			//this.taskManager.addZoom(this.canvas.getZoom()-1);
 			
 		}
 		
@@ -494,9 +402,8 @@ function MazorManager(){
 	
 	MazorManager.prototype.checkPanActivated = function(position){
 		//if(this.mazor.panIcon.getRealPosition().calcDistance(position) < cursorBallRadius*2){
-			this.mazor.activatePan(position);
-			// var t = this;
-		// panTimer = window.setTimeout(function(){t.mazor.activatePan(position);},iconTimeOutms);
+			var t = this;
+			panTimer = window.setTimeout(function(){t.mazor.activatePan(position);},iconTimeOutms);
 	//	} else {
 		//	clearTimeout(panTimer);
 		//}
@@ -504,7 +411,7 @@ function MazorManager(){
 	
 	MazorManager.prototype.checkDeActivatePan = function(position){
 		
-		if(this.mazor.origin.calcDistance(position) < panIconOffset - cursorBallRadius*0.5){
+		if(this.mazor.origin.calcDistance(position) < panIconOffset - cursorBallRadius*3){
 			return true;
 		} else {
 			return false;
@@ -531,13 +438,13 @@ function MazorManager(){
 		var t = this;
 		var direction = t.mazor.getDirection(position);
 		var speed = t.mazor.getSpeed(position);
-		
+
 		
 		//console.log(this.canvas.getCenter().lng(),this.canvas.getCenter().lat(),lng, lat);
 		//console.log(mouseDifLat, mouseDifLng);
 		// this is to move canvas to center
 		panModeTimer = window.setInterval(function(){t.canvas.pan(direction,speed);},panInterval);
-		if (this.directionCompare(oldDirection,direction,position)&& (speed < (oldSpeed -0.1 )||speed == 0 )) {
+		if (this.directionCompare(oldDirection,direction,position)&& (speed < oldSpeed||speed == 0 )) {
 			clearInterval(panModeTimer);
 			this.canvas.panLatLng(this.canvas.getCenter().lat() - mouseDifLat,this.canvas.getCenter().lng() - mouseDifLng);
 		} else {
@@ -546,7 +453,6 @@ function MazorManager(){
 		//TODO is muis naar center kunnen bewegen zonder dat je in een nieuwe staat komt.
 		oldDirection = direction;
 		oldSpeed = speed;
-		this.taskManager.addSpeed(speed);
 	}
 	
 	MazorManager.prototype.checkToClose = function(position){
@@ -557,8 +463,8 @@ function MazorManager(){
 			closeTimer = window.setTimeout(function(){t.mazor.deActivateMazor(position);},iconTimeOutms);
 			return true;
 		} else if(this.mazor.origin.calcDistance(position)> closeRadius){
-			//this.mazor.deActivateMazor(position);
-			//return true;
+			this.mazor.deActivateMazor(position);
+			return true;
 		} else {
 			return false;
 		}
@@ -587,76 +493,7 @@ function MazorManager(){
 	MazorManager.prototype.getMazorLatLng = function(){
 		return this.mazor.originLatLng;
 	}
-	
-	MazorManager.prototype.addClick = function(){
-		if (this.taskManager) {
-			this.taskManager.addClick();
-		}
-	}
-	
-	MazorManager.prototype.addMovement = function(distance){
-		if (this.taskManager) {
-			this.taskManager.addMovement(distance);
-		}
-	}
-	
-	MazorManager.prototype.addWheel = function(){
-		if (this.taskManager) {
-			this.taskManager.addWheel();
-		}
-	}
-	
-	MazorManager.prototype.addZoom = function(zoomFactor){
-		if (this.taskManager) {
-			this.taskManager.addZoom(zoomFactor);
-		}
-	}
-	
-	MazorManager.prototype.success = function(){
-		if (this.taskManager) {
-			this.taskManager.success();
-		}
-	}
-	
-	MazorManager.prototype.ratherMouse = function(){
-		if (this.taskManager) {
-			this.taskManager.ratherMouse();
-		}
-	}
-	
-	MazorManager.prototype.failed = function(){
-		if (this.taskManager) {
-			this.taskManager.failed();
-		}
-	}
-	
-	MazorManager.prototype.change = function(){
-		disable = true;
-		start = false; 
-		this.mazor.hideAll(this.mazor.origin);
-		this.canvas.normalMode();
-		document.addEventListener('click', onMouseClickDisabled, false);
-	}
-	
-	MazorManager.prototype.changeToMazor = function(){
-		disable = false;
-		start = true; 
-		this.canvas.mazorMode();
-		this.mazor.MazorDeActivated.show();
-		this.mazor.updatePosition(previousPosition);
-		document.removeEventListener('click', onMouseClickDisabled, false);
-	}
-	
-	MazorManager.prototype.deActivateMazor = function(position){
-		this.mazor.deActivateMazor(position);
-		clearInterval(panModeTimer);
-		if (disable) {
-			this.mazor.hideAll(this.mazor.origin);
-		}
-	}
-	
-	
-				
+
 //Start of Mazor
 function Mazor(){
 	this.state;
@@ -691,15 +528,13 @@ function Mazor(){
 	}
 
 	Mazor.prototype.init = function(){
-		this.setState(states.DEACTIVATED);
-		if (!disable){
-			this.MazorDeActivated.show();
-		}
+		this.state = states.DEACTIVATED;
+		this.MazorDeActivated.show();
 	}
 	
 	Mazor.prototype.activateMazor = function(){
 		this.originLatLng = mouseLatLng;
-		this.setState(states.ACTIVATED);
+		this.state = states.ACTIVATED;
 		this.MazorDeActivated.hide();
 		this.cursorBall.showNormal();
 		this.cursorBall.setPosition(this.origin);
@@ -721,12 +556,13 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.activateMazorClosable = function(){
-		this.setState(states.ACTIVATEDCLOSABLE);
+		this.state = states.ACTIVATEDCLOSABLE;
 	}
 	
 	Mazor.prototype.activateZoom = function(position){
 		zoomAngle = null;
-		this.setState(states.ZOOMACTIVATED);
+		this.state = states.ZOOMACTIVATED;
+		console.log("hierzp");
 		this.zoomIcon.highlightZoom();		
 		this.zoomIcon.showTwoWay();
 		this.zoomDegrees = this.origin.calcAngle(position);
@@ -745,7 +581,7 @@ function Mazor(){
 	}
 	
 	Mazor.prototype.activatePan = function(position){
-		this.setState(states.PANACTIVATED);
+		this.state = states.PANACTIVATED;
 		//neede because you van go from zoomActivated to Panactivated without passing ACTIVATEDCLOSABLE
 		this.deActivateZoom(position);
 		//this.panIcon.showActivePanIcon();
@@ -757,36 +593,34 @@ function Mazor(){
 	Mazor.prototype.deActivatePan = function(){
 		this.panIcon.showNormal();
 		this.showBlue();
-		this.panLine.hideAll();
 		
 	}
 	
 	Mazor.prototype.activateFullPanMode = function(position){
 		this.zoomIcon.hideAll();
-		this.setState(states.FULLPANMODEACTIVATED);		
+		this.state = states.FULLPANMODEACTIVATED;		
 		this.showGreen();
-		this.panLine.showAll();
+		this.panLine.show();
 	}
 	
 	Mazor.prototype.deActivateFullPanMode = function(){
 		this.panIcon.showNormal();
 		this.cursorBall.showNormal();
 		this.showBlue();
-		this.panLine.hideAll();
+		this.panLine.hide();
 	}
 	
 	Mazor.prototype.deActivateMazor = function(position){
-		this.setState(states.DEACTIVATED);
+		this.state = states.DEACTIVATED;
 		this.MazorDeActivated.show();
 		this.cursorBall.hide();
 		this.innerCircle.hide();
 		this.outerCircle.hide();
 		this.close.hide();
 		this.panIcon.hideAll();
-		this.panLine.hideAll();
 		this.zoomIcon.hideAll();
 		this.updatePosition(this.origin);
-		//mazorManager.checkToActivate();
+		mazorManager.checkToActivate();
 	}
 	
 	Mazor.prototype.highlightZoom = function(){
@@ -844,8 +678,7 @@ function Mazor(){
 	}	
 	
 	Mazor.prototype.getSpeed = function(position){
-		//was 100;
-		var speed = (130 - (maxPanDistance-this.origin.calcDistance(position)))/10;
+		var speed = (100 - (maxPanDistance-this.origin.calcDistance(position)))/10;
 		if (speed < 0){
 			return 0;
 		}else {
@@ -858,19 +691,7 @@ function Mazor(){
 		return this.origin.calcAngle(position);
 	}	
 
-	Mazor.prototype.setState = function(newState){
-		this.state = newState;
-		if (mazorManager.taskManager){
-			mazorManager.taskManager.addState(this.state);
-		}
-	}	
-
-	Mazor.prototype.hideAll	 = function(){
-		this.deActivateMazor();
-		this.MazorDeActivated.hide();
-		
-
-	}		
+				
 	
 	
 function Element(){
@@ -1094,18 +915,11 @@ ZoomHolder.prototype.showHolderStraight = function(){
 PanLine.prototype = new Element();
 function PanLine(){
 	this.setDiv('PanLine');
-	this.panLineDiv = new PanLineDiv();
 }
 
-PanLine.prototype.showAll = function () {
-	this.show();
-	this.panLineDiv.show();
-}
-
-PanLine.prototype.hideAll = function () {
-	this.hide();
-	this.panLineDiv.hide();
-}
+function lineDistance(x, y, x0, y0){
+    return Math.sqrt((x -= x0) * x + (y -= y0) * y);
+};
 
 PanLine.prototype.drawLine = function (origin, position) {
   var pointA = origin;
@@ -1119,16 +933,21 @@ PanLine.prototype.drawLine = function (origin, position) {
 
   this.div.style.setProperty('transform', 'rotate(' + angle + 'deg)');
   this.div.style.setProperty('width', distance + 'px');
-  this.panLineDiv.div.style.setProperty('width', distance - 10 + 'px');
 
   // Set Position
-  this.div.style.setProperty('top', origin.y -10 + ydif +'px');
+  this.div.style.setProperty('top', origin.y + ydif +'px');
   this.div.style.setProperty('left', origin.x - xdif +'px');
-}
-
-PanLineDiv.prototype = new Element();
-function PanLineDiv(){
-	this.setDiv('PanLineDiv');
+/*   if(position.y < origin.y) {
+	 
+  } else {
+	 this.div.style.setProperty('top', position.y +ydif +'px');
+  } */
+/*    if(pointB.x < pointA.x) {
+	 
+  } else {
+	 this.div.style.setProperty('left', origin.x  + xdif +'px');
+  
+  } */
 }
 
 
@@ -1167,350 +986,6 @@ function Point(px,py){
 			return false;
 		}
 	}
-	
-function TaskButton(taskmanager){
-	this.taskManager = taskmanager;
-	
-	this.div = document.getElementById('Task');
-	this.textDiv = document.getElementById('TaskText');
-}
-	
-	TaskButton.prototype.showStartText = function(text){
-		document.documentElement.style.setProperty('--TextButtonColor', 'var(--green-color)');
-		this.textDiv.innerHTML = text;
-	}
-	
-	TaskButton.prototype.showStopText = function(text){
-		document.documentElement.style.setProperty('--TextButtonColor', 'red');
-		this.textDiv.innerHTML = text;
-	}
-	
-	TaskButton.prototype.show = function(){
-		$("#Task").fadeIn();
-		this.div.style.setProperty('visibility','visible');
-	}
-	
-	TaskButton.prototype.hide = function(){
-		//$("#Task").fadeOut();
-		this.div.style.setProperty('visibility','hidden');
-	}
-
-
-	//some ugly code
-//	function onTaskClick(){
-//		mazorManager.taskManager.taskButtonClicked();
-//	}
-	
-//	window.onload=function(){
-//    document.getElementById('Task').addEventListener('click', onTaskClick, false);
-//}
-	
-//Data Class
-function TaskManager(){
-	this.taskCount =0;
-	this.userId = Date.now();
-	//this.tasksDescriptions = new Map();
-	this.tasks = new Set();
-	this.activeTask = new Practice(this.userId,0);
-	this.taskButton = new TaskButton(this);
-
-	//Task definition
-	//this.tasksDescriptions.set(1,"Taak1");
-	//this.tasksDescriptions.set(2,"Taak2");
-}
-
-	TaskManager.prototype.newTask = function(){
-		this.taskCount = this.taskCount + 1;
-		var taskId = this.taskCount;
-		switch(this.taskCount){
-			case 1: 
-				mazorManager.change();
-				var task = new Task1(this.userId,taskId);
-				break;
-			case 2: 
-				var task = new Task2(this.userId,taskId);
-				break;
-			case 3: 
-				var task = new Task3(this.userId,taskId);
-				break;
-			case 4: 
-				var task = new Task4(this.userId,taskId);
-				mazorManager.changeToMazor();
-				break;	
-			case 5: 
-				var task = new Task5(this.userId,taskId);
-				break;
-			case 6: 
-				var task = new Task6(this.userId,taskId);
-				break;
-			case 7: 
-				var task = new CloseUp(this.userId,taskId);
-				break;
-		}
-	    
-		this.tasks.add(task);
-		return task;
-	}
-
-	TaskManager.prototype.send = function(){
-	   Email.send("corjanLeiden@gmail.com", "corjan@gmail.com",	this.userId, this.getTaskData() + "<br><br>" + this.getStatusLog(), "smtp.gmail.com", "CorjanLeiden@gmail.com", "Uffel1Uffel1");   
-	}
-	
-	TaskManager.prototype.getTaskData = function(){
-		//assamble data, create csv format.  
-		var data = "UserId;TaskNumber;StartTime;TotalTime;Clicks;Movement;Wheel;Result" + "<br>"
-
-		
-		for(let task of this.tasks){
-			data = data + task.userId + ";" +task.number+ ";" +task.startTime+ ";" +task.totalTime+ ";" +task.clicks+ ";" +task.movement + ";" +task.wheel + ";" +task.result +"<br>";
-		}			
-		return data;
-	}
-	
-	TaskManager.prototype.getStatusLog = function(){
-	   //assamble data, create csv format.  
-	   	var statusLog = "UserId;TaskNumber;Time;Status" + "<br>"
-		for(let task of this.tasks){
-			statusLog = statusLog +task.statusLog+ "<br>";
-		}			
-		return statusLog;
-	}
-	
-	TaskManager.prototype.taskButtonClicked = function(){
-		//todo
-		//start = true;
- 		// if (!this.activeTask.started) {
-		//	this.taskButton.showStopText(this.activeTask.stopText);
-		//	this.activeTask.start();
-		//}// else if (this.activeTask.started){
-			this.activeTask.stop();
-			this.activeTask = this.newTask();
-			this.activeTask.start();
-			this.taskButton.showStopText(this.activeTask.stopText);
-			this.taskButton.hide();
-			var t = this;
-			window.setTimeout(function(){t.taskButton.show();},400);
-			
-		//}
-	}
-	
-	TaskManager.prototype.addState = function(state){
-		this.activeTask.addState(state);
-	}
-	
-	TaskManager.prototype.addClick = function(){
-		this.activeTask.addClick();
-	}
-	
-	TaskManager.prototype.addMovement = function(distance){
-		this.activeTask.addMovement(distance);
-	}
-	
-	TaskManager.prototype.addWheel = function(){
-		this.activeTask.addWheel();
-	}
-	
-	TaskManager.prototype.addSpeed = function(speed){
-		this.activeTask.addSpeed(speed);
-	}
-	
-	TaskManager.prototype.addZoom = function(zoomFactor){
-		this.activeTask.addZoom(zoomFactor);
-	}
-	
-	TaskManager.prototype.success = function(){
-		this.activeTask.success();
-		this.taskButtonClicked();
-	}
-	
-	TaskManager.prototype.ratherMouse = function(){
-		this.activeTask.ratherMouse();
-		this.taskButtonClicked();
-	}
-	
-	TaskManager.prototype.failed = function(){
-		this.activeTask.failed();
-		this.taskButtonClicked();
-	}
-	
-	
-	
-function Task(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startTime=0;
-	this.clicks=0;
-	this.movement=0;
-	this.totalTime=0;
-	this.wheel=0;
-	this.statusLog="";
-	this.isDone;
-	this.startText;
-	this.stopText;
-	this.started = false;
-	this.result = "";
-
-}
-
-	Task.prototype.start = function(){
-		this.started = true;
-	    this.startTime = Date.now();
-		//todo
-		mazorManager.canvas.map.panTo(this.location);
-		mazorManager.canvas.zoom(this.zoomFactor);
-	}
-	
-	Task.prototype.stop = function(){
-		this.isDone = true;
-		this.totalTime = Date.now() - this.startTime;
-	}
-	
-	Task.prototype.addState = function(state){
-	    this.statusLog = this.statusLog + this.userId + ";" + this.number+ ";" +  Date.now() + ";" + getState(state) + "<br>";
-	}
-	
-	Task.prototype.addZoom = function(zoomLevel){
-	    this.statusLog = this.statusLog + this.userId + ";" + this.number+ ";" +  Date.now() + ";z " + zoomLevel + "<br>";
-	}
-	
-	Task.prototype.addSpeed = function(panSpeed){
-	    this.statusLog = this.statusLog + this.userId + ";" + this.number+ ";" +  Date.now() + ";p " + panSpeed + "<br>";
-	}
-	
-	Task.prototype.addClick = function(){
-	    this.clicks = this.clicks + 1;
-		this.statusLog = this.statusLog + this.userId + ";" + this.number+ ";" +  Date.now() + ";click<br>";
-	}
-	
-	Task.prototype.addWheel = function(){
-	    this.wheel = this.wheel + 1;
-	}
-
-	Task.prototype.addMovement = function(movement){
-	    this.movement = this.movement + Math.abs(movement);
-	}
-	
-	Task.prototype.done = function(){
-	    return this.isDone;
-	}
-	
-	Task.prototype.success = function(){
-	    this.result= "success";
-	}
-	
-	Task.prototype.ratherMouse = function(){
-	    this.result= "ratherMouse";
-	}
-		
-	Task.prototype.failed = function(){
-	    this.result= "failed";
-	}
-	
-function getState(state){
-	var states = {DEACTIVATED:1, ACTIVATED:2, ACTIVATEDCLOSABLE:3, ZOOMACTIVATED:4,PANACTIVATED:5,FULLPANMODEACTIVATED:6};
-	switch( state){
-		case 1:
-			return "DEACTIVATED";
-		case 2:
-			return "ACTIVATED";
-		case 3:
-			return "ACTIVATEDCLOSABLE";
-		case 4:
-			return "ZOOMACTIVATED";
-		case 5:
-			return "PANACTIVATED";
-		case 6:
-			return "FULLPANMODEACTIVATED";
-	}				
-}
-	
-Practice.prototype = new Task();
-function Practice(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startText = "Klik hier om te starten met oefenen";
-	this.stopText = "<a class='Button' >Zoek bv vliegveld bij Jakarta, moskee op </a><BR><BR><a class='Button' >Bali Klik hier als je klaar bent met oefenen</a>";
-}
-
-Task1.prototype = new Task();
-function Task1(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startText = "Nu eerst met MUIS en ZOOMEN rechtsonder<BR>Klik hier om te starten met taak 1: <BR> zoek Amsterdam Centraal";
-	this.stopText = "Nu eerst met MUIS en ZOOMEN rechtsonder<BR>Taak 1: zoek Amsterdam Centraal<br>" + buttonsMazor;
-	this.location = new google.maps.LatLng(52.28958, 5.39524);
-	this.zoomFactor = 8;
-	
-}
-
-Task2.prototype = new Task();
-function Task2(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startText = "Klik hier om te starten met taak 2: <BR> zoek een ziekenhuis in Leeuwarden";
-	this.stopText = "Taak 2: zoek een ziekenhuis in Leeuwarden<br>" + buttonsMazor;
-	this.location = new google.maps.LatLng(53.196635, 5.792486);
-	this.zoomFactor = 19;
-	
-}
-
-Task3.prototype = new Task();
-function Task3(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startText = "Klik hier om te starten met taak 3: <BR> zoek een plek om eten te kopen langs de A31";
-	this.stopText = "Taak 3: zoek een plek om eten te kopen langs de A31<br>" + buttonsMazor;
-	this.location = new google.maps.LatLng(53.368559, 7.305221);
-	this.zoomFactor = 16;
-	
-}
-
-Task4.prototype = new Task();
-function Task4(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startText = "Klik hier om te starten met taak 4: <BR> zoek Amsterdam Centraal";
-	this.stopText = "Nu met de MAZOR! <BR> Taak 4: zoek Rotterdam Centraal<br>" + buttons;
-	this.location = new google.maps.LatLng(52.28958, 5.39524);
-	this.zoomFactor = 8;
-	
-}
-
-Task5.prototype = new Task();
-function Task5(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startText = "Klik hier om te starten met taak 5: <BR> zoek een ziekenhuis in Leeuwarden";
-	this.stopText = "Taak 5: zoek een ziekenhuis in Maastricht<br>" + buttons;
-	this.location = new google.maps.LatLng(50.849093, 5.695795);
-	this.zoomFactor = 19;
-	
-}
-
-Task6.prototype = new Task();
-function Task6(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startText = "Klik hier om te starten met taak 3: <BR> zoek een plek om eten te kopen langs de A44";
-	this.stopText = "Taak 6: zoek een plek om eten te kopen langs de A44<br>" + buttons;
-	this.location = new google.maps.LatLng(51.589606, 8.676892);
-	this.zoomFactor = 16;
-	
-}
-
-	
-CloseUp.prototype = new Task();
-function CloseUp(taskUserId, taskId){
-	this.userId = taskUserId;
-	this.number = taskId;
-	this.startText = "Bedankt voor je medewerking! <br> Ga terug naar het formulier";
-	this.stopText = "Je bent bijna klaar! <br> Ga terug naar het formulier om je mening te geven";
-	this.location = new google.maps.LatLng(53.368559, 7.305221);
-	mazorManager.taskManager.send();
-	
-}	
-	
-	
 
 //Radians
 function rad(x) {
